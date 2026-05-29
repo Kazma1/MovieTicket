@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MovieTicket - Capstone Design Full Version with Live Map</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Leaflet.js Mapping Infrastructure (No API Key Required) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <style>
+        body { background-color: #121212; color: #ffffff; font-family: 'Noto Sans KR', sans-serif; }
+        .cgv-red { color: #ff3d47; }
+        .bg-cgv-red { background-color: #ff3d47; }
+        .bg-cgv-dark { background-color: #1a1a1a; }
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+        #cinema-map-container { height: 350px; width: 100%; border-radius: 12px; z-index: 10; border: 1px solid #374151; }
+        .leaflet-popup-content-wrapper { background: #1a1a1a; color: #fff; border: 1px solid #4b5563; }
+        .leaflet-popup-tip { background: #1a1a1a; }
+    </style>
+</head>
+<body>
+
+    <header class="bg-cgv-dark border-b border-gray-800 sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateTo('main-view')">
+            <i class="fa-solid fa-film text-2xl cgv-red"></i>
+            <span class="text-xl font-bold tracking-wider">MovieTicket</span>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <div id="nav-user-profile-zone" class="flex items-center space-x-3 cursor-pointer group" onclick="navigateTo('profile-view')" title="마이페이지/프로필 보기">
+                <div class="w-8 h-8 rounded-full bg-neutral-800 border border-gray-700 flex items-center justify-center text-gray-300 group-hover:border-red-500 group-hover:text-white transition">
+                    <i class="fa-solid fa-user-astronaut text-sm"></i>
+                </div>
+                <span id="nav-user-status" class="text-xs text-gray-400 group-hover:text-white transition font-medium"></span>
+            </div>
+            <button id="btn-nav-auth" onclick="handleNavAuthClick()" class="text-[11px] bg-neutral-800 hover:bg-neutral-700 px-2.5 py-1.5 rounded-md border border-gray-700 transition font-medium"></button>
+            <button id="btn-nav-admin" onclick="navigateTo('admin-view')" class="text-[11px] bg-indigo-950 hover:bg-indigo-900 px-2.5 py-1.5 rounded-md border border-indigo-800 text-indigo-300 transition hidden"><i class="fa-solid fa-user-gear mr-1"></i> 관리자</button>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-6 min-h-[80vh]">
+
+        <!-- AUTHENTICATION VIEW -->
+        <section id="auth-view" class="view-section max-w-md mx-auto bg-cgv-dark border border-gray-800 p-8 rounded-2xl shadow-2xl space-y-6">
+            <div class="flex justify-around border-b border-gray-800 pb-3">
+                <button id="tab-login" onclick="toggleAuthTab('login')" class="text-lg font-bold cgv-red border-b-2 border-red-500 pb-1">로그인</button>
+                <button id="tab-register" onclick="toggleAuthTab('register')" class="text-lg font-bold text-gray-500 pb-1">회원가입</button>
+            </div>
+
+            <form id="form-login" onsubmit="executeLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">이메일 주소</label>
+                    <input type="email" id="login-email" required class="w-full bg-neutral-900 border border-gray-700 rounded-lg p-2.5 text-sm text-white focus:border-red-500 focus:outline-none" placeholder="example@email.com">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">비밀번호</label>
+                    <input type="password" id="login-pw" required class="w-full bg-neutral-900 border border-gray-700 rounded-lg p-2.5 text-sm text-white focus:border-red-500 focus:outline-none" placeholder="••••••••">
+                </div>
+                <button type="submit" class="w-full bg-cgv-red hover:bg-red-600 font-bold py-2.5 rounded-lg text-sm transition">MovieTicket 인증 로그인</button>
+            </form>
+
+            <form id="form-register" onsubmit="executeRegister(event)" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">이름</label>
+                    <input type="text" id="reg-name" required class="w-full bg-neutral-900 border border-gray-700 rounded-lg p-2.5 text-sm text-white" placeholder="홍길동">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">전화번호</label>
+                    <input type="tel" id="reg-phone" required class="w-full bg-neutral-900 border border-gray-700 rounded-lg p-2.5 text-sm text-white" placeholder="010-1234-5678">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">이메일 주소</label>
+                    <input type="email" id="reg-email" required class="w-full bg-neutral-900 border border-gray-700 rounded-lg p-2.5 text-sm text-white" placeholder="test@test.com">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">비밀번호</label>
+                    <input type="password" id="reg-pw" required class="w-full bg-neutral-900 border border-gray-700 rounded-lg p-2.5 text-sm text-white" placeholder="••••••••">
+                </div>
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 font-bold py-2.5 rounded-lg text-sm transition">가입 및 데이터베이스 동기화</button>
+            </form>
+        </section>
+
+        <!-- MAIN VIEW -->
+        <section id="main-view" class="view-section active space-y-8">
+            <div class="bg-cgv-dark border border-gray-800 p-4 rounded-xl flex flex-col md:flex-row gap-3 items-center justify-between">
+                <div class="flex items-center space-x-2 text-gray-400 text-sm">
+                    <i class="fa-solid fa-circle-nodes cgv-red"></i>
+                    <span>반응형 대작 개봉 타겟 빅데이터 연동 시스템</span>
+                </div>
+                <div class="relative w-full md:w-96">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" id="search-input" onkeyup="filterMovies()" class="w-full bg-neutral-900 border border-gray-700 rounded-lg pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-red-500" placeholder="제목, 장르, 배우 이름으로 영화 검색...">
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-xl font-bold mb-6 flex items-center"><span class="w-1 h-5 bg-cgv-red mr-2 inline-block"></span>현재 상영작 박스오피스</h3>
+                <!-- UI Resize Optimization: Modified class mappings down to a smaller form factor matrix -->
+                <div id="movie-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+            </div>
+        </section>
+
+        <!-- DETAIL VIEW -->
+        <section id="detail-view" class="view-section space-y-6">
+            <button onclick="navigateTo('main-view')" class="text-xs text-gray-400 hover:text-white flex items-center space-x-1">
+                <i class="fa-solid fa-arrow-left"></i> <span>메인 리스트로 가기</span>
+            </button>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 bg-cgv-dark border border-gray-800 p-6 rounded-2xl shadow-2xl">
+                <div class="rounded-xl overflow-hidden shadow-lg bg-neutral-900 aspect-[3/4]">
+                    <img id="detail-poster" src="" alt="포스터" class="w-full h-full object-cover">
+                </div>
+
+                <div class="md:col-span-2 flex flex-col justify-between space-y-6">
+                    <div>
+                        <div class="flex items-center space-x-3 flex-wrap gap-2">
+                            <h2 id="detail-title" class="text-2xl font-black text-white">영화 제목</h2>
+                            <span class="bg-yellow-500 text-black text-xs font-black px-2 py-0.5 rounded-md">Golden Egg 99%</span>
+                        </div>
+                        <p id="detail-meta" class="text-xs text-gray-400 mt-2">장르 | 감독 | 출연진</p>
+                        <p id="detail-plot" class="text-sm text-gray-300 mt-4 leading-relaxed border-t border-gray-800 pt-4">줄거리 요약본</p>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <p class="text-xs font-bold text-gray-400"><i class="fa-brands fa-youtube text-red-500 mr-1"></i> 메인 예고편 오피셜 트레일러 (실시간 재생 지원)</p>
+                        <div class="relative aspect-video w-full rounded-xl overflow-hidden border border-gray-800 bg-black">
+                            <iframe id="detail-video-iframe" class="absolute inset-0 w-full h-full" src="" frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                sandbox="allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe></div>
+                    </div>
+
+                    <button onclick="openTheaterSelectionView()" class="w-full bg-cgv-red hover:bg-red-600 text-white font-extrabold py-3.5 rounded-xl transition text-sm shadow-md flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-map-location-dot"></i> <span>상영 시간 및 좌석 선택하기 (지역/극장 선택)</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-cgv-dark border border-gray-800 rounded-xl p-6 space-y-4">
+                <h4 class="font-bold text-sm text-gray-300 flex items-center justify-between">
+                    <span><i class="fa-regular fa-comment-dots mr-1 cgv-red"></i> 실시간 관람평 및 별점 후기</span>
+                    <span id="detail-avg-stars" class="text-yellow-400 text-xs">평균 평점: 0.0</span>
+                </h4>
+                <div id="review-list" class="space-y-2 divide-y divide-gray-800 text-xs"></div>
+            </div>
+        </section>
+
+        <!-- THEATER & LIVE MAP SELECTION VIEW -->
+        <section id="theater-view" class="view-section space-y-6">
+            <button onclick="navigateTo('detail-view')" class="text-xs text-gray-400 hover:text-white flex items-center space-x-1">
+                <i class="fa-solid fa-chevron-left"></i> <span>영화 상세화면으로 복귀</span>
+            </button>
+
+            <div class="bg-cgv-dark border border-gray-800 rounded-2xl p-6 space-y-6">
+                <div>
+                    <h3 class="text-xl font-bold text-white"><span id="theater-movie-title" class="text-amber-400">영화</span> 관람 지역 및 상영 극장 지정</h3>
+                    <p class="text-xs text-gray-400 mt-1">원하시는 행정 구역을 선택하면 실시간 위성 지도가 동기화되어 극장 위치를 핀포인트로 표기합니다.</p>
+                </div>
+
+                <div class="w-full space-y-2">
+                    <p class="text-xs font-bold text-gray-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-map-location-dot text-emerald-500"></i> 실시간 연동 극장 매핑 인프라 (지도의 마커를 클릭하여 즉시 선택 가능)
+                    </p>
+                    <div id="cinema-map-container"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-neutral-900 p-4 rounded-xl border border-gray-800">
+                        <p class="text-xs font-bold text-gray-400 mb-3"><i class="fa-solid fa-earth-asia mr-1 text-red-500"></i> 1단계: 관람 지역 선택</p>
+                        <div id="region-list-container" class="grid grid-cols-2 gap-2"></div>
+                    </div>
+
+                    <div class="bg-neutral-900 p-4 rounded-xl border border-gray-800">
+                        <p class="text-xs font-bold text-gray-400 mb-3"><i class="fa-solid fa-building-flag mr-1 text-amber-500"></i> 2단계: 상영 극장 인프라 선택</p>
+                        <div id="theater-list-container" class="flex flex-col gap-2">
+                            <p class="text-xs text-gray-500 text-center py-6">먼저 좌측의 행정구역 지역을 선택해 주세요.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RESERVATION VIEW -->
+        <section id="reservation-view" class="view-section space-y-6">
+            <button onclick="navigateTo('theater-view')" class="text-xs text-gray-400 hover:text-white flex items-center space-x-1">
+                <i class="fa-solid fa-chevron-left"></i> <span>극장 재선택 단계로 가기</span>
+            </button>
+
+            <div class="bg-cgv-dark border border-gray-800 rounded-2xl p-6 space-y-6">
+                <div>
+                    <h3 class="text-xl font-bold text-white">
+                        <span id="res-movie-title" class="text-amber-400 mr-1">영화</span> - <span id="res-theater-name" class="text-red-400">극장</span> 스케줄러
+                    </h3>
+                </div>
+
+                <div class="bg-neutral-900 p-4 rounded-xl border border-gray-800 space-y-3">
+                    <p class="text-xs text-gray-400 font-bold"><i class="fa-regular fa-clock mr-1"></i> 당일 배정 상영 시간표 (잔여 좌석 실시간 연동)</p>
+                    <div id="schedule-timeline-container" class="flex flex-wrap gap-3"></div>
+                </div>
+
+                <div id="seat-map-wrapper" class="bg-neutral-950 p-6 rounded-xl border border-gray-900 text-center space-y-6 hidden">
+                    <div class="w-full bg-gray-800 text-gray-400 text-[10px] font-bold py-1 rounded tracking-[0.8em] uppercase">SCREEN CONTAINER</div>
+                    
+                    <div class="flex justify-center space-x-6 text-[11px] text-gray-400">
+                        <div class="flex items-center space-x-1"><span class="w-3 h-3 bg-gray-700 rounded"></span> <span>매진</span></div>
+                        <div class="flex items-center space-x-1"><span class="w-3 h-3 bg-white rounded"></span> <span>예매 가능</span></div>
+                        <div class="flex items-center space-x-1"><span class="w-3 h-3 bg-cgv-red rounded"></span> <span>내 선택 좌석</span></div>
+                    </div>
+
+                    <div class="flex justify-center overflow-x-auto py-2">
+                        <div id="seat-grid-container" class="grid grid-cols-8 gap-2"></div>
+                    </div>
+                </div>
+
+                <div id="res-summary-footer" class="border-t border-gray-800 pt-4 flex flex-col md:flex-row justify-between items-center gap-4 hidden">
+                    <div class="text-center md:text-left text-xs">
+                        <p class="text-gray-400">선택한 최종 스케줄 정보</p>
+                        <p class="text-sm font-bold text-white mt-1">
+                            극장: <span id="sum-theater" class="text-red-400">-</span> | 
+                            상영관: <span id="sum-hall" class="text-white">-</span> | 
+                            시간: <span id="sum-time" class="text-amber-400">-</span> | 
+                            좌석: <span id="sum-seat" class="text-cgv-red">-</span>
+                        </p>
+                    </div>
+                    <button onclick="openPaymentModal()" class="w-full md:w-auto bg-amber-500 hover:bg-amber-600 text-black font-extrabold px-8 py-3 rounded-xl text-sm transition shadow-lg">
+                        결제 수단 및 혜택 선택하기
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAYMENT VIEW -->
+        <section id="payment-view" class="view-section max-w-md mx-auto bg-cgv-dark border border-gray-800 p-6 rounded-2xl shadow-2xl space-y-6">
+            <h3 class="text-lg font-bold text-white border-b border-gray-800 pb-2"><i class="fa-solid fa-credit-card mr-1 cgv-red"></i> 안전 결제 프로세스</h3>
+            
+            <div class="text-xs space-y-2 bg-neutral-900 p-3 rounded-lg border border-gray-800">
+                <p class="text-gray-400">최종 티켓 정보확인</p>
+                <p class="text-sm font-bold text-white" id="pay-target-desc"></p>
+                <p class="text-sm font-bold text-amber-400">결제 금액: ₩ 14,000 <span class="text-xs text-gray-400 font-normal">(쿠폰 최적가 반영됨)</span></p>
+            </div>
+
+            <div class="space-y-2">
+                <p class="text-xs text-gray-400">결제 수단 선택</p>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <label class="flex items-center space-x-2 bg-neutral-900 p-2.5 rounded-lg border border-gray-700 cursor-pointer">
+                        <input type="radio" name="pay-method" value="신용카드" checked class="text-red-500 focus:ring-0 bg-black"><span>신용카드</span>
+                    </label>
+                    <label class="flex items-center space-x-2 bg-neutral-900 p-2.5 rounded-lg border border-gray-700 cursor-pointer">
+                        <input type="radio" name="pay-method" value="카카오페이" class="text-red-500 focus:ring-0 bg-black"><span>카카오페이</span>
+                    </label>
+                    <label class="flex items-center space-x-2 bg-neutral-900 p-2.5 rounded-lg border border-gray-700 cursor-pointer">
+                        <input type="radio" name="pay-method" value="네이버페이" class="text-red-500 focus:ring-0 bg-black"><span>네이버페이</span>
+                    </label>
+                    <label class="flex items-center space-x-2 bg-neutral-900 p-2.5 rounded-lg border border-gray-700 cursor-pointer">
+                        <input type="radio" name="pay-method" value="무통장입금" class="text-red-500 focus:ring-0 bg-black"><span>무통장입금</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex space-x-2 text-xs pt-2">
+                <button onclick="navigateTo('reservation-view')" class="w-1/3 bg-neutral-800 text-gray-400 py-2.5 rounded-lg">이전 단계</button>
+                <button onclick="executeFinalPaymentProcessing()" class="w-2/3 bg-cgv-red hover:bg-red-600 text-white font-bold py-2.5 rounded-lg transition">3초 간편 결제 최종 승인</button>
+            </div>
+        </section>
+
+        <!-- RECEIPT VIEW -->
+        <section id="receipt-view" class="view-section max-w-sm mx-auto text-center space-y-6 bg-cgv-dark border border-gray-800 p-6 rounded-2xl shadow-2xl">
+            <div class="w-12 h-12 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+                <h3 class="text-xl font-bold text-white">예매 성공 및 발권 완료</h3>
+                <p class="text-[11px] text-gray-400 mt-0.5">상단 프로필(마이페이지) 정보 탭에서 상시 재조회가 가능합니다.</p>
+            </div>
+            <div class="flex flex-col gap-2 pt-2">
+                <button onclick="navigateTo('profile-view')" class="w-full bg-cgv-red hover:bg-red-600 text-white text-xs py-2.5 rounded-lg font-bold transition">방금 예매한 모바일 티켓함 가기</button>
+                <button onclick="navigateTo('main-view')" class="w-full bg-gray-800 text-white text-xs py-2 rounded-lg">메인 홈으로 이동</button>
+            </div>
+        </section>
+
+        <!-- PROFILE VIEW -->
+        <section id="profile-view" class="view-section space-y-6">
+            <div class="border-b border-gray-800 pb-4">
+                <h2 class="text-xl font-black text-white flex items-center gap-2">
+                    <i class="fa-solid fa-address-card text-red-500"></i>
+                    <span>마이페이지 및 회원 대시보드</span>
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-cgv-dark border border-gray-800 p-6 rounded-2xl shadow-xl space-y-4">
+                    <h3 class="text-xs font-bold text-gray-300 tracking-wider uppercase border-b border-gray-800 pb-2"><i class="fa-solid fa-user-pen mr-1 cgv-red"></i> 회원 개인정보 관리</h3>
+                    <form onsubmit="executeUpdateProfile(event)" class="space-y-3 text-xs">
+                        <div>
+                            <label class="block text-gray-400 mb-1">사용자 이메일</label>
+                            <input type="email" id="prof-email" readonly class="w-full bg-neutral-950 border border-gray-800 p-2 rounded text-gray-500 cursor-not-allowed">
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 mb-1">고객명</label>
+                            <input type="text" id="prof-name" required class="w-full bg-neutral-900 border border-gray-700 p-2 rounded text-white focus:border-red-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 mb-1">연락처</label>
+                            <input type="tel" id="prof-phone" required class="w-full bg-neutral-900 border border-gray-700 p-2 rounded text-white focus:border-red-500 focus:outline-none">
+                        </div>
+                        <button type="submit" class="w-full bg-neutral-800 hover:bg-neutral-700 text-white font-bold py-2 rounded transition">내 프로필 정보 업데이트</button>
+                    </form>
+                </div>
+
+                <div class="md:col-span-2 space-y-6">
+                    <div class="grid grid-cols-3 gap-4 bg-gradient-to-br from-neutral-900 to-neutral-950 border border-gray-800 p-4 rounded-xl">
+                        <div class="text-center"><p class="text-[10px] text-gray-400">보유 멤버십 등급</p><p class="text-base font-bold text-red-400 mt-1 uppercase tracking-wide">VIP 골드</p></div>
+                        <div class="text-center border-x border-gray-800"><p class="text-[10px] text-gray-400">MovieTicket 할인 쿠폰</p><p class="text-base font-bold text-amber-400 mt-1">2 장</p></div>
+                        <div class="text-center"><p class="text-[10px] text-gray-400">사용 가능한 포인트</p><p class="text-base font-bold text-emerald-400 mt-1">3,500 P</p></div>
+                    </div>
+
+                    <div class="bg-cgv-dark border border-gray-800 p-5 rounded-2xl shadow-xl space-y-4">
+                        <h3 class="text-xs font-bold text-gray-300 tracking-wider uppercase border-b border-gray-800 pb-2"><i class="fa-solid fa-ticket mr-1 cgv-red"></i> 나의 실시간 예매 확인서 / 모바일 티켓 조회</h3>
+                        <div id="profile-ticket-container" class="space-y-4"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ADMIN DASHBOARD -->
+        <section id="admin-view" class="view-section space-y-8">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-800 pb-4">
+                <div>
+                    <h2 class="text-2xl font-black text-white flex items-center gap-2">
+                        <span class="w-2 h-6 bg-indigo-500 inline-block rounded-sm"></span>
+                        <span>통합 인텔리전스 관리자 대시보드</span>
+                    </h2>
+                </div>
+                <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-lg flex items-center gap-1.5 transition">
+                    <i class="fa-regular fa-file-excel text-sm"></i> 매출 통계 Excel 다운로드
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-cgv-dark border border-gray-800 p-4 rounded-xl flex items-center justify-between">
+                    <div><p class="text-[11px] text-gray-400">누적 시스템 총 매출액</p><p id="admin-widget-sales" class="text-xl font-bold mt-1 text-emerald-400">₩ 0</p></div>
+                    <div class="text-xl text-emerald-500 bg-emerald-500/10 p-2.5 rounded-lg"><i class="fa-solid fa-won-sign"></i></div>
+                </div>
+                <div class="bg-cgv-dark border border-gray-800 p-4 rounded-xl flex items-center justify-between">
+                    <div><p class="text-[11px] text-gray-400">실시간 좌석 총 점유율</p><p id="admin-widget-occupancy" class="text-xl font-bold mt-1 text-blue-400">0.0 %</p></div>
+                    <div class="text-xl text-blue-500 bg-blue-500/10 p-2.5 rounded-lg"><i class="fa-solid fa-chart-pie"></i></div>
+                </div>
+                <div class="bg-cgv-dark border border-gray-800 p-4 rounded-xl flex items-center justify-between">
+                    <div><p class="text-[11px] text-gray-400">총 확정 티켓 발권수</p><p id="admin-widget-tickets" class="text-xl font-bold mt-1 text-amber-400">0 건</p></div>
+                    <div class="text-xl text-amber-500 bg-amber-500/10 p-2.5 rounded-lg"><i class="fa-solid fa-ticket"></i></div>
+                </div>
+            </div>
+
+            <!-- UI Feature Addition: Admin Movie Entry Management Component -->
+            <div class="bg-cgv-dark border border-gray-800 rounded-xl p-5 space-y-4">
+                <div class="text-xs font-bold text-gray-300 tracking-wider uppercase border-b border-gray-800 pb-2 flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-plus text-indigo-400"></i> 신규 영화 등록 관리 모듈
+                </div>
+                <form onsubmit="executeAdminAddMovie(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-gray-400 mb-1">영화 제목</label>
+                            <input type="text" id="admin-add-title" required class="w-full bg-neutral-900 border border-gray-700 p-2.5 rounded text-white focus:outline-none focus:border-indigo-500" placeholder="예: 어벤져스">
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 mb-1">장르 및 분류</label>
+                            <input type="text" id="admin-add-genre" required class="w-full bg-neutral-900 border border-gray-700 p-2.5 rounded text-white focus:outline-none focus:border-indigo-500" placeholder="예: 액션, SF">
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-gray-400 mb-1">상영 시간 (러닝타임)</label>
+                            <input type="text" id="admin-add-runtime" required class="w-full bg-neutral-900 border border-gray-700 p-2.5 rounded text-white focus:outline-none focus:border-indigo-500" placeholder="예: 120분">
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 mb-1">포스터 이미지 웹 URL (Unsplash 등)</label>
+                            <input type="url" id="admin-add-poster" required class="w-full bg-neutral-900 border border-gray-700 p-2.5 rounded text-white focus:outline-none focus:border-indigo-500" placeholder="https://images.unsplash.com/...">
+                        </div>
+                    </div>
+                    <div class="flex flex-col justify-between">
+                        <div>
+                            <label class="block text-gray-400 mb-1">영화 줄거리 설명 요약본</label>
+                            <textarea id="admin-add-plot" required rows="3" class="w-full bg-neutral-900 border border-gray-700 p-2 rounded text-white focus:outline-none focus:border-indigo-500 resize-none" placeholder="영화 줄거리를 입력해 주세요..."></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded transition shadow mt-2">
+                            <i class="fa-solid fa-plus mr-1"></i> 시스템 데이터베이스 신규 상영작 등록
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="bg-cgv-dark border border-gray-800 rounded-xl overflow-hidden shadow-md">
+                <div class="p-4 bg-neutral-900 border-b border-gray-800 text-xs font-bold text-gray-300">전체 마스터 상영 스케줄 리스트</div>
+                <div class="overflow-x-auto text-xs">
+                    <table class="w-full text-left text-gray-300">
+                        <thead class="bg-black/40 text-[10px] text-gray-400 uppercase tracking-wider border-b border-gray-800">
+                            <tr>
+                                <th class="p-3">상영 ID</th>
+                                <th class="p-3">영화 제목</th>
+                                <th class="p-3">소속 극장 및 상영관</th>
+                                <th class="p-3">상영시간</th>
+                                <th class="p-3">판매석 / 총좌석 (점유율)</th>
+                                <th class="p-3">누적 매출액</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-table-body" class="divide-y divide-gray-800"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- UI Feature Addition: Modal Overlay Dialog Infrastructure for Ticket Info Inquiries -->
+    <div id="ticket-info-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-neutral-900 border border-gray-700 w-full max-w-sm rounded-2xl p-6 space-y-4 shadow-2xl relative text-xs">
+            <h3 class="text-base font-black text-white border-b border-gray-800 pb-2 flex items-center gap-1.5">
+                <i class="fa-solid fa-receipt text-amber-400"></i> 전자 예매 영수증 상세 내역
+            </h3>
+            <div id="modal-info-content" class="space-y-2.5 text-gray-300"></div>
+            <div class="pt-2">
+                <button onclick="closeTicketInfoModal()" class="w-full bg-neutral-800 hover:bg-neutral-700 font-bold py-2 rounded text-white transition">상세 정보창 닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-20 border-t border-gray-900 bg-neutral-950 p-6 text-center text-xs text-gray-500 space-y-1">
+        <p>동명대학교 컴퓨터공학과 전공연구 산학연계 Capstone Design 프로젝트 결과물</p>
+        <p>© 2026 MovieTicket Team (에르덴). 지도교수 권순량 교수님. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        let cinemaMap = null;
+        let mapMarkers = [];
+
+        // Seed Dataset Data Model
+        let movies = [
+            {
+                id: "M-01",
+                title: "인사이드 아웃 2",
+                genre: "애니메이션, 코미디, 판타지",
+                director: "켈시 맨",
+                actors: "에이미 포에러, 마야 호크",
+                runtime: "96분",
+                grade: "전체 관람가",
+                plot: "고등학교 진학을 앞둔 사춘기 Riley의 마음에 불안(Anxiety), 당황, 부럽, 따분 등 새로운 감정들이 나타나면서 기존 감정들과 충돌하는 대혼란의 모험 이야기.",
+                poster: "inside_out2.webp",
+                trailer: "https://tube.rvere.com/embed?v=VWavstJydZU",
+                reviews: [
+                    { user: "pixar_fan", text: "불안이 캐릭터 묘사가 너무 직관적이고 공감돼요 ㅜㅜ", score: 5 },
+                    { user: "movie_critic", text: "1편 명성에 버금가는 영리한 패러다임 확장.", score: 5 }
+                ]
+            },
+            {
+                id: "M-02",
+                title: "언차티드",
+                genre: "액션, 어드벤처",
+                director: "루벤 플레셔",
+                actors: "톰 홀랜드, 마크 월버그",
+                runtime: "116분",
+                grade: "12세 관람가",
+                plot: "트레저 헌터 설리반과 함께 500년 전 사라진 황금을 찾아 전 세계를 넘나드는 위험천만한 실시간 액션 어드벤처 스릴러.",
+                poster: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=600&auto=format&fit=crop",
+                trailer: "https://www.youtube.com/embed/4w09v9_fL68?autoplay=0&rel=0",
+                reviews: [{ user: "kim**", text: "톰 홀랜드 액션 연기가 대단해요!", score: 4 }]
+            }
+        ];
+
+        const regionalInfrastructure = [
+            { 
+                regionId: "R-01", 
+                regionName: "서울", 
+                center: [37.5665, 126.9780],
+                theaters: [
+                    { name: "CGV 강남", coords: [37.5016, 127.0257] },
+                    { name: "CGV 용산아이파크몰", coords: [37.5283, 126.9641] },
+                    { name: "CGV 홍대", coords: [37.5566, 126.9237] }
+                ] 
+            },
+            { 
+                regionId: "R-02", 
+                regionName: "부산/경남", 
+                center: [35.1796, 129.0756],
+                theaters: [
+                    { name: "CGV 센텀시티", coords: [35.1689, 129.1308] },
+                    { name: "CGV 서면", coords: [35.1534, 129.0596] },
+                    { name: "CGV 아시아드", coords: [35.1914, 129.0631] }
+                ] 
+            }
+        ];
+
+        let schedules = [
+            { id: "S-101", movieId: "M-01", theaterName: "CGV 강남", hall: "IMAX 관", time: "13:30", reservedSeats: ["A3", "B4"] },
+            { id: "S-102", movieId: "M-01", theaterName: "CGV 센텀시티", hall: "1관", time: "16:45", reservedSeats: ["C1"] },
+            { id: "S-103", movieId: "M-01", theaterName: "CGV 용산아이파크몰", hall: "4DX 관", time: "19:00", reservedSeats: [] },
+            { id: "S-201", movieId: "M-02", theaterName: "CGV 강남", hall: "3관", time: "14:00", reservedSeats: ["D7", "D8"] },
+            { id: "S-202", movieId: "M-02", theaterName: "CGV 센텀시티", hall: "IMAX 관", time: "20:15", reservedSeats: [] }
+        ];
+
+        let currentUser = { email: "ee251285@gmail.com", name: "에르덴(팀장)", phone: "010-5880-3013", isAdmin: true };
+        let userTickets = [];
+        let activeMovie = null;
+        let selectedTheater = null;
+        let activeSchedule = null;
+        let selectedSeat = null;
+
+        document.addEventListener("DOMContentLoaded", function() {
+            renderUserNavStatus();
+            renderMovieGrid();
+            updateAdminDashboard();
+            initializeBaseMap();
+        });
+
+        function initializeBaseMap() {
+            if (cinemaMap) return;
+            cinemaMap = L.map('cinema-map-container').setView([36.2681, 127.6358], 7);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(cinemaMap);
+        }
+
+        function navigateTo(viewId) {
+            if((viewId === 'profile-view' || viewId === 'admin-view') && !currentUser) {
+                alert("로그인 세션 인증 후 진입이 가능합니다.");
+                navigateTo('auth-view');
+                return;
+            }
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            window.scrollTo(0,0);
+            
+            if (viewId !== 'detail-view') {
+                document.getElementById('detail-video-iframe').src = "";
+            }
+            if (viewId === 'profile-view') {
+                syncProfileInputs();
+                renderMyTickets();
+            }
+            if (viewId === 'theater-view' && cinemaMap) {
+                setTimeout(() => cinemaMap.invalidateSize(), 200);
+            }
+        }
+
+        function renderUserNavStatus() {
+            const statusText = document.getElementById('nav-user-status');
+            const authBtn = document.getElementById('btn-nav-auth');
+            const adminBtn = document.getElementById('btn-nav-admin');
+            const profileZone = document.getElementById('nav-user-profile-zone');
+
+            if (currentUser) {
+                statusText.innerText = `${currentUser.name}님`;
+                authBtn.innerText = "로그아웃";
+                profileZone.style.display = "flex";
+                if(currentUser.isAdmin) adminBtn.classList.remove('hidden');
+                else adminBtn.classList.add('hidden');
+            } else {
+                statusText.innerText = "로그인";
+                authBtn.innerText = "접속";
+                profileZone.style.display = "none";
+                adminBtn.classList.add('hidden');
+            }
+        }
+
+        function syncProfileInputs() {
+            if (!currentUser) return;
+            document.getElementById('prof-email').value = currentUser.email;
+            document.getElementById('prof-name').value = currentUser.name;
+            document.getElementById('prof-phone').value = currentUser.phone || "010-0000-0000";
+        }
+
+        function handleNavAuthClick() {
+            if (currentUser) {
+                currentUser = null;
+                userTickets = [];
+                renderUserNavStatus();
+                alert("안전하게 로그아웃 되었습니다.");
+                navigateTo('main-view');
+            } else {
+                navigateTo('auth-view');
+            }
+        }
+
+        function toggleAuthTab(tab) {
+            if (tab === 'login') {
+                document.getElementById('form-login').classList.remove('hidden');
+                document.getElementById('form-register').classList.add('hidden');
+            } else {
+                document.getElementById('form-login').classList.add('hidden');
+                document.getElementById('form-register').classList.remove('hidden');
+            }
+        }
+
+        function executeLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            currentUser = { email: email, name: email.split('@')[0], phone: "010-1234-5678", isAdmin: true };
+            renderUserNavStatus();
+            navigateTo('main-view');
+        }
+
+        function executeRegister(e) {
+            e.preventDefault();
+            currentUser = { email: document.getElementById('reg-email').value, name: document.getElementById('reg-name').value, phone: document.getElementById('reg-phone').value, isAdmin: false };
+            renderUserNavStatus();
+            navigateTo('main-view');
+        }
+
+        function executeUpdateProfile(e) {
+            e.preventDefault();
+            if(!currentUser) return;
+            currentUser.name = document.getElementById('prof-name').value;
+            currentUser.phone = document.getElementById('prof-phone').value;
+            renderUserNavStatus();
+            alert("회원 정보 및 데이터베이스 동기화가 완료되었습니다.");
+        }
+
+        function renderMovieGrid() {
+            const grid = document.getElementById('movie-grid');
+            grid.innerHTML = "";
+            
+            movies.forEach(movie => {
+                const card = document.createElement('div');
+                card.className = "bg-cgv-dark border border-gray-800 rounded-xl overflow-hidden group hover:border-red-500 transition-all duration-300 shadow flex flex-col cursor-pointer text-xs";
+                card.onclick = () => openMovieDetail(movie.id);
+                
+                card.innerHTML = `
+                    <div class="relative aspect-[3/4] overflow-hidden bg-neutral-900">
+                        <img src="${movie.poster}" alt="${movie.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute top-1.5 left-1.5 bg-black/70 px-1.5 py-0.5 rounded text-[9px] font-bold text-yellow-400 border border-yellow-500/30">${movie.grade || '12세 관람가'}</div>
+                    </div>
+                    <div class="p-3 flex-1 flex flex-col justify-between space-y-2">
+                        <div>
+                            <h4 class="font-bold text-sm text-white group-hover:text-red-400 transition truncate">${movie.title}</h4>
+                            <p class="text-[10px] text-gray-400 mt-0.5 line-clamp-1">${movie.genre} | ${movie.runtime}</p>
+                        </div>
+                        <div class="flex items-center justify-between text-[10px] pt-1.5 border-t border-gray-900 text-gray-400">
+                            <span><i class="fa-solid fa-star text-yellow-500 mr-0.5"></i> 에그 99%</span>
+                            <span class="text-red-400 font-bold group-hover:text-white transition">예매하기</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterMovies() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const cards = document.getElementById('movie-grid').children;
+            
+            movies.forEach((movie, index) => {
+                const match = movie.title.toLowerCase().includes(query) || 
+                              movie.genre.toLowerCase().includes(query);
+                if(cards[index]) {
+                    cards[index].style.display = match ? "flex" : "none";
+                }
+            });
+        }
+
+        function openMovieDetail(movieId) {
+            activeMovie = movies.find(m => m.id === movieId);
+            if(!activeMovie) return;
+            
+            document.getElementById('detail-title').innerText = activeMovie.title;
+            document.getElementById('detail-meta').innerText = `${activeMovie.genre} | 감독: ${activeMovie.director || '미지정'} | 출연: ${activeMovie.actors || '미지정'} | ${activeMovie.runtime}`;
+            document.getElementById('detail-plot').innerText = activeMovie.plot;
+            document.getElementById('detail-poster').src = activeMovie.poster;
+            document.getElementById('detail-video-iframe').src = activeMovie.trailer || "";
+            
+            renderReviews();
+            navigateTo('detail-view');
+        }
+
+        function renderReviews() {
+            const list = document.getElementById('review-list');
+            const avgStars = document.getElementById('detail-avg-stars');
+            list.innerHTML = "";
+            
+            if(!activeMovie.reviews || activeMovie.reviews.length === 0) {
+                list.innerHTML = `<p class="text-gray-500 text-center py-4">등록된 실시간 관람평이 없습니다.</p>`;
+                avgStars.innerText = "평균 평점: 0.0 / 5.0";
+                return;
+            }
+            
+            let total = 0;
+            activeMovie.reviews.forEach(r => {
+                total += r.score;
+                const item = document.createElement('div');
+                item.className = "py-2.5 flex justify-between items-start gap-4";
+                item.innerHTML = `
+                    <div class="space-y-0.5">
+                        <p class="text-gray-300">${r.text}</p>
+                        <p class="text-[10px] text-gray-500">ID: ${r.user}</p>
+                    </div>
+                    <span class="text-yellow-500 font-bold flex-shrink-0">★ ${r.score}.0</span>
+                `;
+                list.appendChild(item);
+            });
+            avgStars.innerText = `평균 평점: ${(total / activeMovie.reviews.length).toFixed(1)} / 5.0`;
+        }
+
+        function openTheaterSelectionView() {
+            if(!activeMovie) return;
+            document.getElementById('theater-movie-title').innerText = activeMovie.title;
+            
+            const regionContainer = document.getElementById('region-list-container');
+            regionContainer.innerHTML = "";
+            
+            regionalInfrastructure.forEach(reg => {
+                const btn = document.createElement('button');
+                btn.className = "bg-neutral-800 hover:bg-neutral-700 text-white font-medium p-3 rounded-xl border border-gray-700 transition text-left flex justify-between items-center text-xs";
+                btn.onclick = () => selectRegion(reg, btn);
+                btn.innerHTML = `<span>${reg.regionName}</span> <i class="fa-solid fa-angle-right text-gray-500"></i>`;
+                regionContainer.appendChild(btn);
+            });
+            
+            document.getElementById('theater-list-container').innerHTML = `<p class="text-xs text-gray-500 text-center py-6">먼저 좌측의 행정구역 지역을 선택해 주세요.</p>`;
+            navigateTo('theater-view');
+        }
+
+        function selectRegion(region, activeBtn) {
+            activeBtn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('border-red-500', 'bg-neutral-900'));
+            activeBtn.classList.add('border-red-500', 'bg-neutral-900');
+            
+            if(cinemaMap) {
+                cinemaMap.setView(region.center, 11);
+                mapMarkers.forEach(marker => cinemaMap.removeLayer(marker));
+                mapMarkers = [];
+            }
+
+            const theaterContainer = document.getElementById('theater-list-container');
+            theaterContainer.innerHTML = "";
+            
+            region.theaters.forEach(th => {
+                const btn = document.createElement('button');
+                btn.className = "w-full bg-neutral-800 hover:bg-neutral-700 text-left p-3 rounded-lg border border-gray-700 transition text-xs flex justify-between items-center";
+                btn.onclick = () => selectTheater(th.name);
+                btn.innerHTML = `<span><i class="fa-solid fa-building text-gray-500 mr-2"></i>${th.name}</span> <span class="text-[10px] bg-red-950 text-red-400 px-2 py-0.5 rounded">스케줄 조회</span>`;
+                theaterContainer.appendChild(btn);
+
+                if(cinemaMap) {
+                    const marker = L.marker(th.coords).addTo(cinemaMap);
+                    const popupContent = `
+                        <div class="p-1 text-xs">
+                            <h4 class="font-bold text-white mb-1">${th.name}</h4>
+                            <button onclick="selectTheater('${th.name}')" class="bg-red-500 text-white font-bold px-2 py-1 rounded text-[10px] w-full block text-center mt-1">
+                                이 극장 선택하기
+                            </button>
+                        </div>
+                    `;
+                    marker.bindPopup(popupContent);
+                    mapMarkers.push(marker);
+                }
+            });
+        }
+
+        function selectTheater(theaterName) {
+            selectedTheater = theaterName;
+            document.getElementById('res-movie-title').innerText = activeMovie.title;
+            document.getElementById('res-theater-name').innerText = selectedTheater;
+            
+            const timeline = document.getElementById('schedule-timeline-container');
+            timeline.innerHTML = "";
+            
+            const matchedSchedules = schedules.filter(s => s.movieId === activeMovie.id && s.theaterName === selectedTheater);
+            
+            if(matchedSchedules.length === 0) {
+                timeline.innerHTML = `<p class="text-xs text-gray-500 py-2">현재 선점 가능한 상영 마스터 스케줄이 배정되지 않았습니다.</p>`;
+                document.getElementById('seat-map-wrapper').classList.add('hidden');
+                document.getElementById('res-summary-footer').classList.add('hidden');
+            } else {
+                matchedSchedules.forEach(sch => {
+                    const btn = document.createElement('button');
+                    btn.className = "bg-neutral-800 hover:bg-neutral-700 border border-gray-700 rounded-xl p-3 text-center transition flex flex-col items-center min-w-[100px]";
+                    btn.onclick = () => activateSeatMap(sch, btn);
+                    
+                    const totalSeats = 32; 
+                    const leftSeats = totalSeats - sch.reservedSeats.length;
+                    
+                    btn.innerHTML = `
+                        <span class="text-sm font-black text-amber-400">${sch.time}</span>
+                        <span class="text-[10px] text-gray-400 mt-0.5">${sch.hall}</span>
+                        <span class="text-[9px] text-emerald-400 mt-1 bg-emerald-950/50 px-1.5 py-0.5 rounded">${leftSeats}석 잔여</span>
+                    `;
+                    timeline.appendChild(btn);
+                });
+            }
+            document.getElementById('seat-map-wrapper').classList.add('hidden');
+            document.getElementById('res-summary-footer').classList.add('hidden');
+            navigateTo('reservation-view');
+        }
+
+        function activateSeatMap(schedule, btnElement) {
+            activeSchedule = schedule;
+            selectedSeat = null; 
+            
+            btnElement.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('border-amber-400', 'bg-neutral-900'));
+            btnElement.classList.add('border-amber-400', 'bg-neutral-900');
+            
+            const gridContainer = document.getElementById('seat-grid-container');
+            gridContainer.innerHTML = "";
+            
+            const rows = ['A', 'B', 'C', 'D'];
+            const cols = 8;
+            
+            rows.forEach(row => {
+                for(let c = 1; c <= cols; c++) {
+                    const seatId = `${row}${c}`;
+                    const isReserved = activeSchedule.reservedSeats.includes(seatId);
+                    
+                    const seat = document.createElement('button');
+                    seat.id = `seat-${seatId}`;
+                    seat.disabled = isReserved;
+                    seat.innerText = seatId;
+                    
+                    if(isReserved) {
+                        seat.className = "w-9 h-9 bg-neutral-800 border border-neutral-950 text-gray-600 rounded text-[10px] font-bold cursor-not-allowed";
+                    } else {
+                        seat.className = "w-9 h-9 bg-white border border-gray-300 text-black rounded text-[10px] font-black hover:bg-red-200 transition";
+                        seat.onclick = () => handleSeatClick(seatId);
+                    }
+                    gridContainer.appendChild(seat);
+                }
+            });
+            document.getElementById('seat-map-wrapper').classList.remove('hidden');
+            updateReservationSummary();
+        }
+
+        function handleSeatClick(seatId) {
+            const rows = ['A', 'B', 'C', 'D'];
+            rows.forEach(r => {
+                for(let c=1; c<=8; c++) {
+                    const id = `${r}${c}`;
+                    const target = document.getElementById(`seat-${id}`);
+                    if(target && !target.disabled) {
+                        target.className = "w-9 h-9 bg-white border border-gray-300 text-black rounded text-[10px] font-black hover:bg-red-200 transition";
+                    }
+                }
+            });
+            
+            if (selectedSeat === seatId) {
+                selectedSeat = null;
+            } else {
+                selectedSeat = seatId;
+                const activeSeatNode = document.getElementById(`seat-${seatId}`);
+                if(activeSeatNode) {
+                    activeSeatNode.className = "w-9 h-9 bg-cgv-red border border-red-600 text-white rounded text-[10px] font-black scale-105 shadow-md";
+                }
+            }
+            updateReservationSummary();
+        }
+
+        function updateReservationSummary() {
+            const footer = document.getElementById('res-summary-footer');
+            if(!activeSchedule) return;
+            
+            footer.classList.remove('hidden');
+            document.getElementById('sum-theater').innerText = activeSchedule.theaterName;
+            document.getElementById('sum-hall').innerText = activeSchedule.hall;
+            document.getElementById('sum-time').innerText = activeSchedule.time;
+            document.getElementById('sum-seat').innerText = selectedSeat ? selectedSeat : "좌석 미선택";
+        }
+
+        function openPaymentModal() {
+            if(!currentUser) {
+                alert("결제는 로그인 세션 인증이 필요합니다.");
+                navigateTo('auth-view');
+                return;
+            }
+            if(!selectedSeat) {
+                alert("관람하실 좌석을 먼저 지정해 주세요.");
+                return;
+            }
+            document.getElementById('pay-target-desc').innerText = `${activeMovie.title} | ${activeSchedule.theaterName} ${activeSchedule.hall} [좌석: ${selectedSeat}]`;
+            navigateTo('payment-view');
+        }
+
+        function executeFinalPaymentProcessing() {
+            if(!activeSchedule || !selectedSeat) return;
+            
+            activeSchedule.reservedSeats.push(selectedSeat);
+            
+            const ticket = {
+                id: "TKT-" + Math.floor(Math.random() * 900000 + 100000),
+                scheduleId: activeSchedule.id,
+                movieTitle: activeMovie.title,
+                theater: activeSchedule.theaterName,
+                hall: activeSchedule.hall,
+                time: activeSchedule.time,
+                seat: selectedSeat,
+                price: 14000,
+                date: new Date().toLocaleDateString('ko-KR') + " " + new Date().toLocaleTimeString('ko-KR')
+            };
+            
+            userTickets.unshift(ticket);
+            updateAdminDashboard();
+            renderMovieGrid(); 
+            navigateTo('receipt-view');
+        }
+
+        // UI Feature Modification: Enhanced Ticket Dashboard with Cancellation and Info Modals
+        function renderMyTickets() {
+            const container = document.getElementById('profile-ticket-container');
+            container.innerHTML = "";
+            
+            if(userTickets.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-500 text-center py-6">최근 예매 및 영수증 발권 내역이 존재하지 않습니다.</p>`;
+                return;
+            }
+            
+            userTickets.forEach(t => {
+                const item = document.createElement('div');
+                item.className = "bg-neutral-950 border border-gray-800 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs";
+                item.innerHTML = `
+                    <div class="space-y-1 flex-1 cursor-pointer" onclick="openTicketInfoModal('${t.id}')" title="티켓 상세 정보 보기">
+                        <p class="font-bold text-sm text-amber-400 hover:underline flex items-center gap-1">
+                            <span>${t.movieTitle}</span> <i class="fa-solid fa-circle-info text-[10px] text-gray-500"></i>
+                        </p>
+                        <p class="text-gray-300">${t.theater} | ${t.hall} | <span class="text-red-400 font-bold">${t.seat}좌석</span></p>
+                        <p class="text-[10px] text-gray-500">발권 고유 ID: ${t.id}</p>
+                    </div>
+                    <div class="w-full sm:w-auto flex items-center gap-2 border-t sm:border-t-0 border-gray-900 pt-2 sm:pt-0">
+                        <button onclick="executeCancelTicket('${t.id}')" class="bg-neutral-900 hover:bg-red-950 text-gray-400 hover:text-red-400 border border-gray-800 hover:border-red-900 px-2.5 py-1.5 rounded transition font-medium">
+                            예매 취소
+                        </button>
+                        <span class="bg-emerald-950 text-emerald-400 border border-emerald-900 px-3 py-1.5 rounded font-bold tracking-wider inline-block">발권 완료</span>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // UI Feature Addition: Action handling logic for ticket entry revocations
+        function executeCancelTicket(ticketId) {
+            if(!confirm("선택하신 영화 티켓 예매를 취소하시겠습니까? 취소 즉시 좌석이 반환됩니다.")) return;
+            
+            const ticketIndex = userTickets.findIndex(t => t.id === ticketId);
+            if(ticketIndex === -1) return;
+            
+            const ticket = userTickets[ticketIndex];
+            const sch = schedules.find(s => s.id === ticket.scheduleId);
+            if(sch) {
+                sch.reservedSeats = sch.reservedSeats.filter(seat => seat !== ticket.seat);
+            }
+            
+            userTickets.splice(ticketIndex, 1);
+            alert("예매 취소 처리가 완료되었습니다. 금액이 전액 환불됩니다.");
+            
+            renderMyTickets();
+            updateAdminDashboard();
+        }
+
+        // UI Feature Addition: Detail Modal Inspection Engine Functions
+        function openTicketInfoModal(ticketId) {
+            const ticket = userTickets.find(t => t.id === ticketId);
+            if(!ticket) return;
+            
+            const modal = document.getElementById('ticket-info-modal');
+            const content = document.getElementById('modal-info-content');
+            
+            content.innerHTML = `
+                <div class="space-y-1.5 border-b border-gray-800 pb-2 mb-2">
+                    <p class="text-gray-400">영화 타이틀</p>
+                    <p class="text-sm font-bold text-white">${ticket.movieTitle}</p>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <p class="text-gray-400">상영 극장</p>
+                        <p class="font-bold text-white">${ticket.theater}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400">지정 상영관</p>
+                        <p class="font-bold text-white">${ticket.hall}</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2 mt-2">
+                    <div>
+                        <p class="text-gray-400">상영 시작 시간</p>
+                        <p class="font-bold text-amber-400">${ticket.time}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400">예매 좌석 번호</p>
+                        <p class="font-bold text-red-400">${ticket.seat}</p>
+                    </div>
+                </div>
+                <div class="space-y-1.5 border-t border-gray-800 pt-2 mt-2">
+                    <p class="text-gray-400">결제 승인 일시</p>
+                    <p class="text-gray-300">${ticket.date}</p>
+                    <p class="text-gray-400 mt-1">영수증 거래 금액</p>
+                    <p class="font-bold text-emerald-400">₩ ${ticket.price.toLocaleString()} (원화 결제 완료)</p>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+        }
+
+        function closeTicketInfoModal() {
+            document.getElementById('ticket-info-modal').classList.add('hidden');
+        }
+
+        // UI Feature Addition: Admin data input pipeline handling
+        function executeAdminAddMovie(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('admin-add-title').value;
+            const genre = document.getElementById('admin-add-genre').value;
+            const runtime = document.getElementById('admin-add-runtime').value;
+            const poster = document.getElementById('admin-add-poster').value;
+            const plot = document.getElementById('admin-add-plot').value;
+            
+            const newMovieId = "M-0" + (movies.length + 1);
+            
+            const newMovie = {
+                id: newMovieId,
+                title: title,
+                genre: genre,
+                director: "관리자 등록",
+                actors: "현장 캐스팅진",
+                runtime: runtime,
+                grade: "12세 관람가",
+                plot: plot,
+                poster: poster,
+                reviews: []
+            };
+            
+            movies.push(newMovie);
+            
+            // Generate standard mock timetable paths for the added movie across active locations
+            schedules.push(
+                { id: `S-${movies.length}01`, movieId: newMovieId, theaterName: "CGV 센텀시티", hall: "2관", time: "14:15", reservedSeats: [] },
+                { id: `S-${movies.length}02`, movieId: newMovieId, theaterName: "CGV 강남", hall: "5관", time: "18:30", reservedSeats: [] }
+            );
+            
+            alert(`[데이터베이스 성공] 신규 상영작 "${title}" 등록 완료 및 스케줄러 배정이 완결되었습니다.`);
+            
+            // Flush management form UI fields
+            e.target.reset();
+            
+            renderMovieGrid();
+            updateAdminDashboard();
+        }
+
+        function updateAdminDashboard() {
+            let totalSales = 0;
+            let totalReservedSeats = 0;
+            const totalCapacity = schedules.length * 32; 
+            const tbody = document.getElementById('admin-table-body');
+            tbody.innerHTML = "";
+            
+            schedules.forEach(s => {
+                const movie = movies.find(m => m.id === s.movieId);
+                const title = movie ? movie.title : "알 수 없는 영화";
+                const sales = s.reservedSeats.length * 14000;
+                totalSales += sales;
+                totalReservedSeats += s.reservedSeats.length;
+                
+                const occupancyRate = ((s.reservedSeats.length / 32) * 100).toFixed(1);
+                
+                const row = document.createElement('tr');
+                row.className = "hover:bg-neutral-900/50 transition";
+                row.innerHTML = `
+                    <td class="p-3 font-mono text-gray-400">${s.id}</td>
+                    <td class="p-3 font-bold text-white">${title}</td>
+                    <td class="p-3 text-gray-300">${s.theaterName} (${s.hall})</td>
+                    <td class="p-3 text-amber-400 font-medium">${s.time}</td>
+                    <td class="p-3 text-blue-400">${s.reservedSeats.length} / 32 (${occupancyRate}%)</td>
+                    <td class="p-3 font-bold text-emerald-400">₩ ${sales.toLocaleString()}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            document.getElementById('admin-widget-sales').innerText = `₩ ${totalSales.toLocaleString()}`;
+            document.getElementById('admin-widget-occupancy').innerText = totalCapacity > 0 ? `${((totalReservedSeats / totalCapacity) * 100).toFixed(1)} %` : "0.0 %";
+            document.getElementById('admin-widget-tickets').innerText = `${totalReservedSeats} 건`;
+        }
+
+        function exportToExcel() {
+            let dataRows = [];
+            schedules.forEach(s => {
+                const movie = movies.find(m => m.id === s.movieId);
+                const title = movie ? movie.title : "";
+                const sales = s.reservedSeats.length * 14000;
+                dataRows.push({
+                    "상영 일정 ID": s.id,
+                    "영화 타이틀": title,
+                    "상영 극장": s.theaterName,
+                    "상영관": s.hall,
+                    "상영 시간": s.time,
+                    "예매 좌석수": s.reservedSeats.length,
+                    "누적 매출액(원)": sales
+                });
+            });
+            const worksheet = XLSX.utils.json_to_sheet(dataRows);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "매출 통계");
+            XLSX.writeFile(workbook, "MovieTicket_Capstone_Sales_Report.xlsx");
+        }
+    </script>
+</body>
+</html>
