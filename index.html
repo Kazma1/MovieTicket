@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MovieTicket - Capstone Design Full Version with Live Map</title>
+    <title>MovieTicket - Capstone Design Full Version (Schedule Add Mode)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Leaflet.js Mapping Infrastructure (No API Key Required) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
@@ -46,7 +45,6 @@
 
     <main class="max-w-7xl mx-auto p-6 min-h-[80vh]">
 
-        <!-- AUTHENTICATION VIEW -->
         <section id="auth-view" class="view-section max-w-md mx-auto bg-cgv-dark border border-gray-800 p-8 rounded-2xl shadow-2xl space-y-6">
             <div class="flex justify-around border-b border-gray-800 pb-3">
                 <button id="tab-login" onclick="toggleAuthTab('login')" class="text-lg font-bold cgv-red border-b-2 border-red-500 pb-1">로그인</button>
@@ -86,7 +84,6 @@
             </form>
         </section>
 
-        <!-- MAIN VIEW -->
         <section id="main-view" class="view-section active space-y-8">
             <div class="bg-cgv-dark border border-gray-800 p-4 rounded-xl flex flex-col md:flex-row gap-3 items-center justify-between">
                 <div class="flex items-center space-x-2 text-gray-400 text-sm">
@@ -103,12 +100,10 @@
 
             <div>
                 <h3 class="text-xl font-bold mb-6 flex items-center"><span class="w-1 h-5 bg-cgv-red mr-2 inline-block"></span>현재 상영작 박스오피스</h3>
-                <!-- UI Resize Optimization: Modified class mappings down to a smaller form factor matrix -->
                 <div id="movie-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
             </div>
         </section>
 
-        <!-- DETAIL VIEW -->
         <section id="detail-view" class="view-section space-y-6">
             <button onclick="navigateTo('main-view')" class="text-xs text-gray-400 hover:text-white flex items-center space-x-1">
                 <i class="fa-solid fa-arrow-left"></i> <span>메인 리스트로 가기</span>
@@ -152,7 +147,6 @@
             </div>
         </section>
 
-        <!-- THEATER & LIVE MAP SELECTION VIEW -->
         <section id="theater-view" class="view-section space-y-6">
             <button onclick="navigateTo('detail-view')" class="text-xs text-gray-400 hover:text-white flex items-center space-x-1">
                 <i class="fa-solid fa-chevron-left"></i> <span>영화 상세화면으로 복귀</span>
@@ -187,7 +181,6 @@
             </div>
         </section>
 
-        <!-- RESERVATION VIEW -->
         <section id="reservation-view" class="view-section space-y-6">
             <button onclick="navigateTo('theater-view')" class="text-xs text-gray-400 hover:text-white flex items-center space-x-1">
                 <i class="fa-solid fa-chevron-left"></i> <span>극장 재선택 단계로 가기</span>
@@ -236,14 +229,13 @@
             </div>
         </section>
 
-        <!-- PAYMENT VIEW -->
         <section id="payment-view" class="view-section max-w-md mx-auto bg-cgv-dark border border-gray-800 p-6 rounded-2xl shadow-2xl space-y-6">
             <h3 class="text-lg font-bold text-white border-b border-gray-800 pb-2"><i class="fa-solid fa-credit-card mr-1 cgv-red"></i> 안전 결제 프로세스</h3>
             
             <div class="text-xs space-y-2 bg-neutral-900 p-3 rounded-lg border border-gray-800">
                 <p class="text-gray-400">최종 티켓 정보확인</p>
                 <p class="text-sm font-bold text-white" id="pay-target-desc"></p>
-                <p class="text-sm font-bold text-amber-400">결제 금액: ₩ 14,000 <span class="text-xs text-gray-400 font-normal">(쿠폰 최적가 반영됨)</span></p>
+                <p class="text-sm font-bold text-amber-400">결제 금액: ₩ <span id="pay-amount-text">14,000</span> <span class="text-xs text-gray-400 font-normal">(쿠폰 최적가 반영됨)</span></p>
             </div>
 
             <div class="space-y-2">
@@ -270,7 +262,6 @@
             </div>
         </section>
 
-        <!-- RECEIPT VIEW -->
         <section id="receipt-view" class="view-section max-w-sm mx-auto text-center space-y-6 bg-cgv-dark border border-gray-800 p-6 rounded-2xl shadow-2xl">
             <div class="w-12 h-12 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto text-xl">
                 <i class="fa-solid fa-circle-check"></i>
@@ -285,7 +276,6 @@
             </div>
         </section>
 
-        <!-- PROFILE VIEW -->
         <section id="profile-view" class="view-section space-y-6">
             <div class="border-b border-gray-800 pb-4">
                 <h2 class="text-xl font-black text-white flex items-center gap-2">
@@ -329,7 +319,6 @@
             </div>
         </section>
 
-        <!-- ADMIN DASHBOARD -->
         <section id="admin-view" class="view-section space-y-8">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-800 pb-4">
                 <div>
@@ -358,10 +347,9 @@
                 </div>
             </div>
 
-            <!-- UI Feature Addition: Admin Movie Entry Management Component -->
             <div class="bg-cgv-dark border border-gray-800 rounded-xl p-5 space-y-4">
                 <div class="text-xs font-bold text-gray-300 tracking-wider uppercase border-b border-gray-800 pb-2 flex items-center gap-1.5">
-                    <i class="fa-solid fa-circle-plus text-indigo-400"></i> 신규 영화 등록 관리 모듈
+                    <i class="fa-solid fa-circle-plus text-indigo-400"></i> 신규 영화 등록 관리 
                 </div>
                 <form onsubmit="executeAdminAddMovie(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                     <div class="space-y-3">
@@ -380,7 +368,7 @@
                             <input type="text" id="admin-add-runtime" required class="w-full bg-neutral-900 border border-gray-700 p-2.5 rounded text-white focus:outline-none focus:border-indigo-500" placeholder="예: 120분">
                         </div>
                         <div>
-                            <label class="block text-gray-400 mb-1">포스터 이미지 웹 URL (Unsplash 등)</label>
+                            <label class="block text-gray-400 mb-1">포스터 이미지 웹 URL</label>
                             <input type="url" id="admin-add-poster" required class="w-full bg-neutral-900 border border-gray-700 p-2.5 rounded text-white focus:outline-none focus:border-indigo-500" placeholder="https://images.unsplash.com/...">
                         </div>
                     </div>
@@ -396,8 +384,55 @@
                 </form>
             </div>
 
+            <div class="bg-cgv-dark border border-gray-800 rounded-xl p-5 space-y-4">
+                <div class="text-xs font-bold text-gray-300 tracking-wider uppercase border-b border-gray-800 pb-2 flex items-center gap-1.5">
+                    <i class="fa-solid fa-calendar-plus text-emerald-400"></i> 상영 시간표 및 상영관 신규 추가 
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                    <div>
+                        <label class="block text-gray-400 mb-1">1단계: 등록할 대상 영화 선택</label>
+                        <select id="admin-filter-movie" onchange="onAdminMovieChange(this.value)" class="w-full bg-neutral-900 border border-gray-700 p-2.5 rounded text-white focus:outline-none focus:border-emerald-500">
+                            <option value="">-- 영화를 고르세요 --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 mb-1">2단계: 지역 선택</label>
+                        <select id="admin-filter-region" onchange="onAdminRegionChange(this.value)" disabled class="w-full bg-neutral-900 border border-gray-700 p-2.5 rounded text-white focus:outline-none focus:border-emerald-500 disabled:opacity-40">
+                            <option value="">-- 지역 선택 --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 mb-1">3단계: 최종 목적지 극장 선택</label>
+                        <select id="admin-filter-theater" onchange="onAdminTheaterChange(this.value)" disabled class="w-full bg-neutral-900 border border-gray-700 p-2.5 rounded text-white focus:outline-none focus:border-emerald-500 disabled:opacity-40">
+                            <option value="">-- 극장 선택 --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <form onsubmit="executeAdminInsertSchedule(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs pt-4 border-t border-gray-800/60">
+                    <div>
+                        <label class="block text-gray-400 mb-1">상영관 입력 (Hall)</label>
+                        <input type="text" id="admin-ins-sch-hall" required placeholder="예: IMAX관, 2관" class="w-full bg-neutral-900 border border-gray-700 p-2.5 rounded text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 mb-1">상영 시간 지정 (Time)</label>
+                        <input type="text" id="admin-ins-sch-time" required placeholder="예: 14:20 또는 21:00" class="w-full bg-neutral-900 border border-gray-700 p-2.5 rounded text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 mb-1">티켓 판매 단가 책정 (Cost)</label>
+                        <input type="number" id="admin-ins-sch-price" required placeholder="예: 14000" class="w-full bg-neutral-900 border border-gray-700 p-2.5 rounded text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded transition shadow">
+                            <i class="fa-solid fa-plus-circle mr-1"></i> 새로운 상영 일정 추가(Insert)하기
+                        </button>
+                    </div>
+                </form>
+            </div>
+
             <div class="bg-cgv-dark border border-gray-800 rounded-xl overflow-hidden shadow-md">
-                <div class="p-4 bg-neutral-900 border-b border-gray-800 text-xs font-bold text-gray-300">전체 마스터 상영 스케줄 리스트</div>
+                <div class="p-4 bg-neutral-900 border-b border-gray-800 text-xs font-bold text-gray-300">전체 마스터 상영 스케줄 데이터베이스 통합 대장</div>
                 <div class="overflow-x-auto text-xs">
                     <table class="w-full text-left text-gray-300">
                         <thead class="bg-black/40 text-[10px] text-gray-400 uppercase tracking-wider border-b border-gray-800">
@@ -406,6 +441,7 @@
                                 <th class="p-3">영화 제목</th>
                                 <th class="p-3">소속 극장 및 상영관</th>
                                 <th class="p-3">상영시간</th>
+                                <th class="p-3">티켓 가격</th>
                                 <th class="p-3">판매석 / 총좌석 (점유율)</th>
                                 <th class="p-3">누적 매출액</th>
                             </tr>
@@ -418,7 +454,6 @@
 
     </main>
 
-    <!-- UI Feature Addition: Modal Overlay Dialog Infrastructure for Ticket Info Inquiries -->
     <div id="ticket-info-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-neutral-900 border border-gray-700 w-full max-w-sm rounded-2xl p-6 space-y-4 shadow-2xl relative text-xs">
             <h3 class="text-base font-black text-white border-b border-gray-800 pb-2 flex items-center gap-1.5">
@@ -440,7 +475,7 @@
         let cinemaMap = null;
         let mapMarkers = [];
 
-        // Seed Dataset Data Model
+        // Global Movie Database
         let movies = [
             {
                 id: "M-01",
@@ -451,8 +486,8 @@
                 runtime: "96분",
                 grade: "전체 관람가",
                 plot: "고등학교 진학을 앞둔 사춘기 Riley의 마음에 불안(Anxiety), 당황, 부럽, 따분 등 새로운 감정들이 나타나면서 기존 감정들과 충돌하는 대혼란의 모험 이야기.",
-                poster: "inside_out2.webp",
-                trailer: "https://tube.rvere.com/embed?v=VWavstJydZU",
+                poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=600&auto=format&fit=crop",
+                trailer: "https://www.youtube.com/embed/1Ct9v7S_W4I",
                 reviews: [
                     { user: "pixar_fan", text: "불안이 캐릭터 묘사가 너무 직관적이고 공감돼요 ㅜㅜ", score: 5 },
                     { user: "movie_critic", text: "1편 명성에 버금가는 영리한 패러다임 확장.", score: 5 }
@@ -468,11 +503,12 @@
                 grade: "12세 관람가",
                 plot: "트레저 헌터 설리반과 함께 500년 전 사라진 황금을 찾아 전 세계를 넘나드는 위험천만한 실시간 액션 어드벤처 스릴러.",
                 poster: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=600&auto=format&fit=crop",
-                trailer: "https://www.youtube.com/embed/4w09v9_fL68?autoplay=0&rel=0",
+                trailer: "https://www.youtube.com/embed/eHp3MbsCb3M",
                 reviews: [{ user: "kim**", text: "톰 홀랜드 액션 연기가 대단해요!", score: 4 }]
             }
         ];
 
+        // Infrastructure Location Nodes Matrix Map
         const regionalInfrastructure = [
             { 
                 regionId: "R-01", 
@@ -496,609 +532,655 @@
             }
         ];
 
+        // Global Schedules Array Master Database Tables
         let schedules = [
-            { id: "S-101", movieId: "M-01", theaterName: "CGV 강남", hall: "IMAX 관", time: "13:30", reservedSeats: ["A3", "B4"] },
-            { id: "S-102", movieId: "M-01", theaterName: "CGV 센텀시티", hall: "1관", time: "16:45", reservedSeats: ["C1"] },
-            { id: "S-103", movieId: "M-01", theaterName: "CGV 용산아이파크몰", hall: "4DX 관", time: "19:00", reservedSeats: [] },
-            { id: "S-201", movieId: "M-02", theaterName: "CGV 강남", hall: "3관", time: "14:00", reservedSeats: ["D7", "D8"] },
-            { id: "S-202", movieId: "M-02", theaterName: "CGV 센텀시티", hall: "IMAX 관", time: "20:15", reservedSeats: [] }
+            { id: "S-101", movieId: "M-01", theaterName: "CGV 강남", hall: "IMAX 관", time: "13:30", price: 14000, reservedSeats: ["A3", "B4"] },
+            { id: "S-102", movieId: "M-01", theaterName: "CGV 센텀시티", hall: "1관", time: "16:45", price: 13000, reservedSeats: ["C1"] },
+            { id: "S-103", movieId: "M-01", theaterName: "CGV 용산아이파크몰", hall: "4DX 관", time: "19:00", price: 18000, reservedSeats: [] },
+            { id: "S-201", movieId: "M-02", theaterName: "CGV 강남", hall: "3관", time: "14:00", price: 14000, reservedSeats: ["D7", "D8"] },
+            { id: "S-202", movieId: "M-02", theaterName: "CGV 센텀시티", hall: "IMAX 관", time: "20:15", price: 16000, reservedSeats: [] }
         ];
 
-        let currentUser = { email: "ee251285@gmail.com", name: "에르덴(팀장)", phone: "010-5880-3013", isAdmin: true };
+        // Core Session Flags
+        let currentUser = {
+            email: "ee251285@gmail.com",
+            name: "에르덴(팀장)",
+            phone: "010-5880-3013",
+            isAdmin: true
+        };
         let userTickets = [];
-        let activeMovie = null;
+        
+        let selectedMovie = null;
+        let selectedRegion = null;
         let selectedTheater = null;
-        let activeSchedule = null;
+        let selectedSchedule = null;
         let selectedSeat = null;
 
-        document.addEventListener("DOMContentLoaded", function() {
-            renderUserNavStatus();
+        window.onload = function() {
+            initAppSession();
             renderMovieGrid();
-            updateAdminDashboard();
-            initializeBaseMap();
-        });
+            initLeafletMapInfrastructure();
+        };
 
-        function initializeBaseMap() {
-            if (cinemaMap) return;
-            cinemaMap = L.map('cinema-map-container').setView([36.2681, 127.6358], 7);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(cinemaMap);
-        }
-
-        function navigateTo(viewId) {
-            if((viewId === 'profile-view' || viewId === 'admin-view') && !currentUser) {
-                alert("로그인 세션 인증 후 진입이 가능합니다.");
-                navigateTo('auth-view');
-                return;
-            }
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
-            window.scrollTo(0,0);
-            
-            if (viewId !== 'detail-view') {
-                document.getElementById('detail-video-iframe').src = "";
-            }
-            if (viewId === 'profile-view') {
-                syncProfileInputs();
-                renderMyTickets();
-            }
-            if (viewId === 'theater-view' && cinemaMap) {
-                setTimeout(() => cinemaMap.invalidateSize(), 200);
-            }
-        }
-
-        function renderUserNavStatus() {
-            const statusText = document.getElementById('nav-user-status');
-            const authBtn = document.getElementById('btn-nav-auth');
-            const adminBtn = document.getElementById('btn-nav-admin');
-            const profileZone = document.getElementById('nav-user-profile-zone');
+        function initAppSession() {
+            const statusText = document.getElementById("nav-user-status");
+            const authBtn = document.getElementById("btn-nav-auth");
+            const adminBtn = document.getElementById("btn-nav-admin");
 
             if (currentUser) {
                 statusText.innerText = `${currentUser.name}님`;
                 authBtn.innerText = "로그아웃";
-                profileZone.style.display = "flex";
-                if(currentUser.isAdmin) adminBtn.classList.remove('hidden');
-                else adminBtn.classList.add('hidden');
+                if (currentUser.isAdmin) adminBtn.classList.remove("hidden");
+                
+                document.getElementById("prof-email").value = currentUser.email;
+                document.getElementById("prof-name").value = currentUser.name;
+                document.getElementById("prof-phone").value = currentUser.phone || "";
             } else {
-                statusText.innerText = "로그인";
-                authBtn.innerText = "접속";
-                profileZone.style.display = "none";
-                adminBtn.classList.add('hidden');
+                statusText.innerText = "비인증 세션 계정";
+                authBtn.innerText = "로그인";
+                adminBtn.classList.add("hidden");
             }
         }
 
-        function syncProfileInputs() {
-            if (!currentUser) return;
-            document.getElementById('prof-email').value = currentUser.email;
-            document.getElementById('prof-name').value = currentUser.name;
-            document.getElementById('prof-phone').value = currentUser.phone || "010-0000-0000";
+        function navigateTo(viewId) {
+            if ((viewId === 'profile-view' || viewId === 'admin-view') && !currentUser) {
+                alert("로그인 세션 인증 정보가 식별되지 않았습니다.");
+                navigateTo('auth-view');
+                return;
+            }
+
+            document.querySelectorAll(".view-section").forEach(section => {
+                section.classList.remove("active");
+            });
+            document.getElementById(viewId).classList.add("active");
+
+            if (viewId === "theater-view" && cinemaMap) {
+                setTimeout(() => { cinemaMap.invalidateSize(); }, 200);
+            }
+            if (viewId === "admin-view") {
+                renderAdminDashboard();
+                initAdminDropdownFilters();
+            }
+            window.scrollTo(0, 0);
         }
 
         function handleNavAuthClick() {
             if (currentUser) {
                 currentUser = null;
                 userTickets = [];
-                renderUserNavStatus();
-                alert("안전하게 로그아웃 되었습니다.");
-                navigateTo('main-view');
+                initAppSession();
+                alert("안전하게 로그아웃이 완결되었습니다.");
+                navigateTo("main-view");
             } else {
-                navigateTo('auth-view');
+                navigateTo("auth-view");
             }
         }
 
-        function toggleAuthTab(tab) {
-            if (tab === 'login') {
-                document.getElementById('form-login').classList.remove('hidden');
-                document.getElementById('form-register').classList.add('hidden');
+        function toggleAuthTab(tabType) {
+            const loginTab = document.getElementById("tab-login");
+            const regTab = document.getElementById("tab-register");
+            const loginForm = document.getElementById("form-login");
+            const regForm = document.getElementById("form-register");
+
+            if (tabType === 'login') {
+                loginTab.className = "text-lg font-bold cgv-red border-b-2 border-red-500 pb-1";
+                regTab.className = "text-lg font-bold text-gray-500 pb-1";
+                loginForm.classList.remove("hidden");
+                regForm.classList.add("hidden");
             } else {
-                document.getElementById('form-login').classList.add('hidden');
-                document.getElementById('form-register').classList.remove('hidden');
+                regTab.className = "text-lg font-bold cgv-red border-b-2 border-red-500 pb-1";
+                loginTab.className = "text-lg font-bold text-gray-500 pb-1";
+                regForm.classList.remove("hidden");
+                loginForm.classList.add("hidden");
             }
         }
 
         function executeLogin(e) {
             e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            currentUser = { email: email, name: email.split('@')[0], phone: "010-1234-5678", isAdmin: true };
-            renderUserNavStatus();
-            navigateTo('main-view');
+            const email = document.getElementById("login-email").value;
+            currentUser = {
+                email: email,
+                name: email.split('@')[0],
+                phone: "010-1234-5678",
+                isAdmin: true
+            };
+            initAppSession();
+            alert(`환영합니다, ${currentUser.name}님! 시스템 통합 인증에 성공하였습니다.`);
+            navigateTo("main-view");
         }
 
         function executeRegister(e) {
             e.preventDefault();
-            currentUser = { email: document.getElementById('reg-email').value, name: document.getElementById('reg-name').value, phone: document.getElementById('reg-phone').value, isAdmin: false };
-            renderUserNavStatus();
-            navigateTo('main-view');
+            alert("회원가입 트랜잭션이 데이터베이스 커밋 단계에 도달했습니다.");
+            toggleAuthTab('login');
         }
 
         function executeUpdateProfile(e) {
             e.preventDefault();
-            if(!currentUser) return;
-            currentUser.name = document.getElementById('prof-name').value;
-            currentUser.phone = document.getElementById('prof-phone').value;
-            renderUserNavStatus();
-            alert("회원 정보 및 데이터베이스 동기화가 완료되었습니다.");
+            currentUser.name = document.getElementById("prof-name").value;
+            currentUser.phone = document.getElementById("prof-phone").value;
+            initAppSession();
+            alert("회원 정보 테이블 변경 처리가 완결되었습니다.");
         }
 
         function renderMovieGrid() {
-            const grid = document.getElementById('movie-grid');
+            const grid = document.getElementById("movie-grid");
             grid.innerHTML = "";
-            
             movies.forEach(movie => {
-                const card = document.createElement('div');
-                card.className = "bg-cgv-dark border border-gray-800 rounded-xl overflow-hidden group hover:border-red-500 transition-all duration-300 shadow flex flex-col cursor-pointer text-xs";
-                card.onclick = () => openMovieDetail(movie.id);
-                
-                card.innerHTML = `
-                    <div class="relative aspect-[3/4] overflow-hidden bg-neutral-900">
-                        <img src="${movie.poster}" alt="${movie.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                        <div class="absolute top-1.5 left-1.5 bg-black/70 px-1.5 py-0.5 rounded text-[9px] font-bold text-yellow-400 border border-yellow-500/30">${movie.grade || '12세 관람가'}</div>
-                    </div>
-                    <div class="p-3 flex-1 flex flex-col justify-between space-y-2">
-                        <div>
-                            <h4 class="font-bold text-sm text-white group-hover:text-red-400 transition truncate">${movie.title}</h4>
-                            <p class="text-[10px] text-gray-400 mt-0.5 line-clamp-1">${movie.genre} | ${movie.runtime}</p>
+                grid.innerHTML += `
+                    <div onclick="openMovieDetail('${movie.id}')" class="bg-cgv-dark border border-gray-800 rounded-xl overflow-hidden group hover:border-red-500 transition-all duration-300 shadow flex flex-col cursor-pointer text-xs">
+                        <div class="relative aspect-[3/4] overflow-hidden bg-neutral-900">
+                            <img src="${movie.poster}" alt="포스터" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                            <div class="absolute top-1.5 left-1.5 bg-black/70 px-1.5 py-0.5 rounded text-[9px] font-bold text-yellow-400 border border-yellow-500/30">${movie.grade}</div>
                         </div>
-                        <div class="flex items-center justify-between text-[10px] pt-1.5 border-t border-gray-900 text-gray-400">
-                            <span><i class="fa-solid fa-star text-yellow-500 mr-0.5"></i> 에그 99%</span>
-                            <span class="text-red-400 font-bold group-hover:text-white transition">예매하기</span>
+                        <div class="p-3 flex-1 flex flex-col justify-between space-y-2">
+                            <div>
+                                <h4 class="font-bold text-sm text-white group-hover:text-red-400 transition truncate">${movie.title}</h4>
+                                <p class="text-[10px] text-gray-400 mt-0.5 line-clamp-1">${movie.genre} | ${movie.runtime}</p>
+                            </div>
+                            <div class="flex items-center justify-between text-[10px] pt-1.5 border-t border-gray-900 text-gray-400">
+                                <span><i class="fa-solid fa-star text-yellow-500 mr-0.5"></i> 에그 99%</span>
+                                <span class="text-red-400 font-bold group-hover:text-white transition">예매하기</span>
+                            </div>
                         </div>
                     </div>
                 `;
-                grid.appendChild(card);
             });
         }
 
         function filterMovies() {
-            const query = document.getElementById('search-input').value.toLowerCase();
-            const cards = document.getElementById('movie-grid').children;
-            
-            movies.forEach((movie, index) => {
-                const match = movie.title.toLowerCase().includes(query) || 
-                              movie.genre.toLowerCase().includes(query);
-                if(cards[index]) {
-                    cards[index].style.display = match ? "flex" : "none";
+            const query = document.getElementById("search-input").value.toLowerCase();
+            document.querySelectorAll("#movie-grid > div").forEach((card, idx) => {
+                const targetMovie = movies[idx];
+                if (targetMovie.title.toLowerCase().includes(query) || targetMovie.genre.toLowerCase().includes(query)) {
+                    card.classList.remove("hidden");
+                } else {
+                    card.classList.add("hidden");
                 }
             });
         }
 
         function openMovieDetail(movieId) {
-            activeMovie = movies.find(m => m.id === movieId);
-            if(!activeMovie) return;
+            selectedMovie = movies.find(m => m.id === movieId);
+            if (!selectedMovie) return;
+
+            document.getElementById("detail-poster").src = selectedMovie.poster;
+            document.getElementById("detail-title").innerText = selectedMovie.title;
+            document.getElementById("detail-meta").innerText = `${selectedMovie.genre} | 감독: ${selectedMovie.director} | 상영시간: ${selectedMovie.runtime}`;
+            document.getElementById("detail-plot").innerText = selectedMovie.plot;
+            document.getElementById("detail-video-iframe").src = selectedMovie.trailer;
+
+            const reviewList = document.getElementById("review-list");
+            reviewList.innerHTML = "";
+            let totalScore = 0;
             
-            document.getElementById('detail-title').innerText = activeMovie.title;
-            document.getElementById('detail-meta').innerText = `${activeMovie.genre} | 감독: ${activeMovie.director || '미지정'} | 출연: ${activeMovie.actors || '미지정'} | ${activeMovie.runtime}`;
-            document.getElementById('detail-plot').innerText = activeMovie.plot;
-            document.getElementById('detail-poster').src = activeMovie.poster;
-            document.getElementById('detail-video-iframe').src = activeMovie.trailer || "";
-            
-            renderReviews();
-            navigateTo('detail-view');
+            if (selectedMovie.reviews.length === 0) {
+                reviewList.innerHTML = `<p class="text-gray-500 text-center py-4">등록된 누적 관람평 후기 데이터가 존재하지 않습니다.</p>`;
+            } else {
+                selectedMovie.reviews.forEach(r => {
+                    totalScore += r.score;
+                    reviewList.innerHTML += `
+                        <div class="py-2.5 first:pt-0">
+                            <div class="flex justify-between text-gray-400 text-[10px] mb-1">
+                                <span class="font-bold text-gray-300"><i class="fa-regular fa-user mr-1 text-gray-600"></i>${r.user}</span>
+                                <span class="text-yellow-500">${"★".repeat(r.score)}</span>
+                            </div>
+                            <p class="text-gray-300 pl-4 relative"><span class="absolute left-0 text-red-500/40">"</span>${r.text}</p>
+                        </div>
+                    `;
+                });
+            }
+            const avg = selectedMovie.reviews.length > 0 ? (totalScore / selectedMovie.reviews.length).toFixed(1) : "0.0";
+            document.getElementById("detail-avg-stars").innerText = `평균 평점: ★ ${avg}`;
+
+            navigateTo("detail-view");
         }
 
-        function renderReviews() {
-            const list = document.getElementById('review-list');
-            const avgStars = document.getElementById('detail-avg-stars');
-            list.innerHTML = "";
-            
-            if(!activeMovie.reviews || activeMovie.reviews.length === 0) {
-                list.innerHTML = `<p class="text-gray-500 text-center py-4">등록된 실시간 관람평이 없습니다.</p>`;
-                avgStars.innerText = "평균 평점: 0.0 / 5.0";
-                return;
-            }
-            
-            let total = 0;
-            activeMovie.reviews.forEach(r => {
-                total += r.score;
-                const item = document.createElement('div');
-                item.className = "py-2.5 flex justify-between items-start gap-4";
-                item.innerHTML = `
-                    <div class="space-y-0.5">
-                        <p class="text-gray-300">${r.text}</p>
-                        <p class="text-[10px] text-gray-500">ID: ${r.user}</p>
-                    </div>
-                    <span class="text-yellow-500 font-bold flex-shrink-0">★ ${r.score}.0</span>
-                `;
-                list.appendChild(item);
-            });
-            avgStars.innerText = `평균 평점: ${(total / activeMovie.reviews.length).toFixed(1)} / 5.0`;
+        function initLeafletMapInfrastructure() {
+            cinemaMap = L.map('cinema-map-container').setView([36.2681, 127.6358], 7);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap markers mapping data'
+            }).addTo(cinemaMap);
         }
 
         function openTheaterSelectionView() {
-            if(!activeMovie) return;
-            document.getElementById('theater-movie-title').innerText = activeMovie.title;
-            
-            const regionContainer = document.getElementById('region-list-container');
-            regionContainer.innerHTML = "";
-            
+            document.getElementById("theater-movie-title").innerText = selectedMovie.title;
+            const container = document.getElementById("region-list-container");
+            container.innerHTML = "";
+
             regionalInfrastructure.forEach(reg => {
-                const btn = document.createElement('button');
-                btn.className = "bg-neutral-800 hover:bg-neutral-700 text-white font-medium p-3 rounded-xl border border-gray-700 transition text-left flex justify-between items-center text-xs";
-                btn.onclick = () => selectRegion(reg, btn);
-                btn.innerHTML = `<span>${reg.regionName}</span> <i class="fa-solid fa-angle-right text-gray-500"></i>`;
-                regionContainer.appendChild(btn);
+                container.innerHTML += `
+                    <button onclick="selectRegionMapping('${reg.regionId}')" class="font-medium p-3 rounded-xl bg-neutral-800 border border-gray-700 text-left text-xs flex justify-between items-center hover:border-red-500 transition">
+                        <span>${reg.regionName}</span> <i class="fa-solid fa-angle-right text-gray-500"></i>
+                    </button>
+                `;
             });
-            
-            document.getElementById('theater-list-container').innerHTML = `<p class="text-xs text-gray-500 text-center py-6">먼저 좌측의 행정구역 지역을 선택해 주세요.</p>`;
-            navigateTo('theater-view');
+
+            document.getElementById("theater-list-container").innerHTML = `<p class="text-xs text-gray-500 text-center py-6">먼저 좌측의 행정구역 지역을 선택해 주세요.</p>`;
+            navigateTo("theater-view");
         }
 
-        function selectRegion(region, activeBtn) {
-            activeBtn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('border-red-500', 'bg-neutral-900'));
-            activeBtn.classList.add('border-red-500', 'bg-neutral-900');
-            
-            if(cinemaMap) {
-                cinemaMap.setView(region.center, 11);
-                mapMarkers.forEach(marker => cinemaMap.removeLayer(marker));
-                mapMarkers = [];
-            }
+        function selectRegionMapping(regionId) {
+            selectedRegion = regionalInfrastructure.find(r => r.regionId === regionId);
+            cinemaMap.setView(selectedRegion.center, 11);
 
-            const theaterContainer = document.getElementById('theater-list-container');
-            theaterContainer.innerHTML = "";
-            
-            region.theaters.forEach(th => {
-                const btn = document.createElement('button');
-                btn.className = "w-full bg-neutral-800 hover:bg-neutral-700 text-left p-3 rounded-lg border border-gray-700 transition text-xs flex justify-between items-center";
-                btn.onclick = () => selectTheater(th.name);
-                btn.innerHTML = `<span><i class="fa-solid fa-building text-gray-500 mr-2"></i>${th.name}</span> <span class="text-[10px] bg-red-950 text-red-400 px-2 py-0.5 rounded">스케줄 조회</span>`;
-                theaterContainer.appendChild(btn);
+            mapMarkers.forEach(m => cinemaMap.removeLayer(m));
+            mapMarkers = [];
 
-                if(cinemaMap) {
-                    const marker = L.marker(th.coords).addTo(cinemaMap);
-                    const popupContent = `
-                        <div class="p-1 text-xs">
-                            <h4 class="font-bold text-white mb-1">${th.name}</h4>
-                            <button onclick="selectTheater('${th.name}')" class="bg-red-500 text-white font-bold px-2 py-1 rounded text-[10px] w-full block text-center mt-1">
-                                이 극장 선택하기
-                            </button>
-                        </div>
-                    `;
-                    marker.bindPopup(popupContent);
-                    mapMarkers.push(marker);
-                }
+            const thContainer = document.getElementById("theater-list-container");
+            thContainer.innerHTML = "";
+
+            selectedRegion.theaters.forEach(th => {
+                const marker = L.marker(th.coords).addTo(cinemaMap);
+                marker.bindPopup(`<div class="p-1 text-xs text-white font-bold">${th.name}</div>`);
+                
+                marker.on('click', () => {
+                    selectTheaterInfrastructure(th.name);
+                });
+                mapMarkers.push(marker);
+
+                thContainer.innerHTML += `
+                    <button onclick="selectTheaterInfrastructure('${th.name}')" class="w-full bg-neutral-800 hover:bg-neutral-700 text-left p-3 rounded-lg border border-gray-700 text-xs flex justify-between items-center transition">
+                        <span><i class="fa-solid fa-building text-gray-500 mr-2"></i>${th.name}</span>
+                        <span class="text-[10px] bg-red-950 text-red-400 px-2 py-0.5 rounded">스케줄 조회</span>
+                    </button>
+                `;
             });
         }
 
-        function selectTheater(theaterName) {
+        function selectTheaterInfrastructure(theaterName) {
             selectedTheater = theaterName;
-            document.getElementById('res-movie-title').innerText = activeMovie.title;
-            document.getElementById('res-theater-name').innerText = selectedTheater;
-            
-            const timeline = document.getElementById('schedule-timeline-container');
-            timeline.innerHTML = "";
-            
-            const matchedSchedules = schedules.filter(s => s.movieId === activeMovie.id && s.theaterName === selectedTheater);
-            
-            if(matchedSchedules.length === 0) {
-                timeline.innerHTML = `<p class="text-xs text-gray-500 py-2">현재 선점 가능한 상영 마스터 스케줄이 배정되지 않았습니다.</p>`;
-                document.getElementById('seat-map-wrapper').classList.add('hidden');
-                document.getElementById('res-summary-footer').classList.add('hidden');
+            document.getElementById("res-movie-title").innerText = selectedMovie.title;
+            document.getElementById("res-theater-name").innerText = selectedTheater;
+
+            const schTimeline = document.getElementById("schedule-timeline-container");
+            schTimeline.innerHTML = "";
+
+            const matchedSchedules = schedules.filter(s => s.movieId === selectedMovie.id && s.theaterName === selectedTheater);
+
+            if (matchedSchedules.length === 0) {
+                schTimeline.innerHTML = `<p class="text-xs text-gray-500 py-2">지정하신 극장에 당일 편성된 상영 스케줄이 없습니다.</p>`;
+                document.getElementById("seat-map-wrapper").classList.add("hidden");
+                document.getElementById("res-summary-footer").classList.add("hidden");
             } else {
                 matchedSchedules.forEach(sch => {
-                    const btn = document.createElement('button');
-                    btn.className = "bg-neutral-800 hover:bg-neutral-700 border border-gray-700 rounded-xl p-3 text-center transition flex flex-col items-center min-w-[100px]";
-                    btn.onclick = () => activateSeatMap(sch, btn);
-                    
-                    const totalSeats = 32; 
-                    const leftSeats = totalSeats - sch.reservedSeats.length;
-                    
-                    btn.innerHTML = `
-                        <span class="text-sm font-black text-amber-400">${sch.time}</span>
-                        <span class="text-[10px] text-gray-400 mt-0.5">${sch.hall}</span>
-                        <span class="text-[9px] text-emerald-400 mt-1 bg-emerald-950/50 px-1.5 py-0.5 rounded">${leftSeats}석 잔여</span>
+                    const remainingSeats = 32 - sch.reservedSeats.length;
+                    schTimeline.innerHTML += `
+                        <button onclick="selectActiveTimeScheduler('${sch.id}')" class="border border-gray-700 bg-neutral-800 hover:border-amber-500 rounded-xl p-3 text-center transition flex flex-col items-center min-w-[100px]">
+                            <span class="text-sm font-black text-amber-400">${sch.time}</span>
+                            <span class="text-[10px] text-gray-400 mt-0.5">${sch.hall}</span>
+                            <span class="text-[9px] text-emerald-400 mt-1 bg-emerald-950/50 px-1.5 py-0.5 rounded">${remainingSeats}석 잔여</span>
+                        </button>
                     `;
-                    timeline.appendChild(btn);
                 });
             }
-            document.getElementById('seat-map-wrapper').classList.add('hidden');
-            document.getElementById('res-summary-footer').classList.add('hidden');
-            navigateTo('reservation-view');
+            navigateTo("reservation-view");
         }
 
-        function activateSeatMap(schedule, btnElement) {
-            activeSchedule = schedule;
-            selectedSeat = null; 
-            
-            btnElement.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('border-amber-400', 'bg-neutral-900'));
-            btnElement.classList.add('border-amber-400', 'bg-neutral-900');
-            
-            const gridContainer = document.getElementById('seat-grid-container');
-            gridContainer.innerHTML = "";
-            
+        function selectActiveTimeScheduler(scheduleId) {
+            selectedSchedule = schedules.find(s => s.id === scheduleId);
+            selectedSeat = null;
+
+            document.querySelectorAll("#schedule-timeline-container > button").forEach(btn => {
+                if (btn.innerHTML.includes(selectedSchedule.time)) {
+                    btn.className = "border border-amber-400 bg-neutral-900 rounded-xl p-3 text-center transition flex flex-col items-center min-w-[100px]";
+                } else {
+                    btn.className = "border border-gray-700 bg-neutral-800 hover:border-amber-500 rounded-xl p-3 text-center transition flex flex-col items-center min-w-[100px]";
+                }
+            });
+
+            document.getElementById("seat-map-wrapper").classList.remove("hidden");
+            document.getElementById("res-summary-footer").classList.remove("hidden");
+
+            renderSeatMatrixMap();
+            updateSummaryFooter();
+        }
+
+        function renderSeatMatrixMap() {
+            const container = document.getElementById("seat-grid-container");
+            container.innerHTML = "";
             const rows = ['A', 'B', 'C', 'D'];
-            const cols = 8;
-            
+
             rows.forEach(row => {
-                for(let c = 1; c <= cols; c++) {
-                    const seatId = `${row}${c}`;
-                    const isReserved = activeSchedule.reservedSeats.includes(seatId);
-                    
-                    const seat = document.createElement('button');
-                    seat.id = `seat-${seatId}`;
-                    seat.disabled = isReserved;
-                    seat.innerText = seatId;
-                    
-                    if(isReserved) {
-                        seat.className = "w-9 h-9 bg-neutral-800 border border-neutral-950 text-gray-600 rounded text-[10px] font-bold cursor-not-allowed";
+                for (let i = 1; i <= 8; i++) {
+                    const seatId = `${row}${i}`;
+                    const isReserved = selectedSchedule.reservedSeats.includes(seatId);
+                    const isSelected = (selectedSeat === seatId);
+
+                    let btnClass = "w-9 h-9 rounded text-[10px] font-black transition ";
+                    if (isReserved) {
+                        btnClass += "bg-neutral-800 text-gray-600 cursor-not-allowed";
+                    } else if (isSelected) {
+                        btnClass += "bg-cgv-red text-white";
                     } else {
-                        seat.className = "w-9 h-9 bg-white border border-gray-300 text-black rounded text-[10px] font-black hover:bg-red-200 transition";
-                        seat.onclick = () => handleSeatClick(seatId);
+                        btnClass += "bg-white text-black hover:bg-red-200";
                     }
-                    gridContainer.appendChild(seat);
+
+                    container.innerHTML += `
+                        <button ${isReserved ? 'disabled' : ''} onclick="toggleSeatSelection('${seatId}')" class="${btnClass}">
+                            ${seatId}
+                        </button>
+                    `;
                 }
             });
-            document.getElementById('seat-map-wrapper').classList.remove('hidden');
-            updateReservationSummary();
         }
 
-        function handleSeatClick(seatId) {
-            const rows = ['A', 'B', 'C', 'D'];
-            rows.forEach(r => {
-                for(let c=1; c<=8; c++) {
-                    const id = `${r}${c}`;
-                    const target = document.getElementById(`seat-${id}`);
-                    if(target && !target.disabled) {
-                        target.className = "w-9 h-9 bg-white border border-gray-300 text-black rounded text-[10px] font-black hover:bg-red-200 transition";
-                    }
-                }
-            });
-            
+        function toggleSeatSelection(seatId) {
             if (selectedSeat === seatId) {
                 selectedSeat = null;
             } else {
                 selectedSeat = seatId;
-                const activeSeatNode = document.getElementById(`seat-${seatId}`);
-                if(activeSeatNode) {
-                    activeSeatNode.className = "w-9 h-9 bg-cgv-red border border-red-600 text-white rounded text-[10px] font-black scale-105 shadow-md";
-                }
             }
-            updateReservationSummary();
+            renderSeatMatrixMap();
+            updateSummaryFooter();
         }
 
-        function updateReservationSummary() {
-            const footer = document.getElementById('res-summary-footer');
-            if(!activeSchedule) return;
-            
-            footer.classList.remove('hidden');
-            document.getElementById('sum-theater').innerText = activeSchedule.theaterName;
-            document.getElementById('sum-hall').innerText = activeSchedule.hall;
-            document.getElementById('sum-time').innerText = activeSchedule.time;
-            document.getElementById('sum-seat').innerText = selectedSeat ? selectedSeat : "좌석 미선택";
+        function updateSummaryFooter() {
+            document.getElementById("sum-theater").innerText = selectedSchedule.theaterName;
+            document.getElementById("sum-hall").innerText = selectedSchedule.hall;
+            document.getElementById("sum-time").innerText = selectedSchedule.time;
+            document.getElementById("sum-seat").innerText = selectedSeat ? selectedSeat : "미선택";
         }
 
         function openPaymentModal() {
-            if(!currentUser) {
-                alert("결제는 로그인 세션 인증이 필요합니다.");
-                navigateTo('auth-view');
+            if (!selectedSeat) {
+                alert("예매를 진행할 좌석을 선택해 주십시오.");
                 return;
             }
-            if(!selectedSeat) {
-                alert("관람하실 좌석을 먼저 지정해 주세요.");
-                return;
-            }
-            document.getElementById('pay-target-desc').innerText = `${activeMovie.title} | ${activeSchedule.theaterName} ${activeSchedule.hall} [좌석: ${selectedSeat}]`;
-            navigateTo('payment-view');
+            document.getElementById("pay-target-desc").innerText = 
+                `${selectedMovie.title} - ${selectedSchedule.theaterName} [${selectedSchedule.hall}] | 좌석: ${selectedSeat}`;
+            
+            const finalCost = selectedSchedule.price ? selectedSchedule.price : 14000;
+            document.getElementById("pay-amount-text").innerText = finalCost.toLocaleString();
+            
+            navigateTo("payment-view");
         }
 
         function executeFinalPaymentProcessing() {
-            if(!activeSchedule || !selectedSeat) return;
-            
-            activeSchedule.reservedSeats.push(selectedSeat);
-            
-            const ticket = {
-                id: "TKT-" + Math.floor(Math.random() * 900000 + 100000),
-                scheduleId: activeSchedule.id,
-                movieTitle: activeMovie.title,
-                theater: activeSchedule.theaterName,
-                hall: activeSchedule.hall,
-                time: activeSchedule.time,
-                seat: selectedSeat,
-                price: 14000,
-                date: new Date().toLocaleDateString('ko-KR') + " " + new Date().toLocaleTimeString('ko-KR')
+            selectedSchedule.reservedSeats.push(selectedSeat);
+            const ticketPrice = selectedSchedule.price ? selectedSchedule.price : 14000;
+
+            const newTicket = {
+                ticketId: "TKT-" + Math.floor(Math.random() * 900000 + 100000),
+                movieTitle: selectedMovie.title,
+                theaterName: selectedSchedule.theaterName,
+                hall: selectedSchedule.hall,
+                time: selectedSchedule.time,
+                seatId: selectedSeat,
+                price: ticketPrice,
+                date: new Date().toLocaleString('ko-KR')
             };
-            
-            userTickets.unshift(ticket);
-            updateAdminDashboard();
-            renderMovieGrid(); 
-            navigateTo('receipt-view');
+
+            userTickets.unshift(newTicket);
+            renderUserTicketsContainer();
+            navigateTo("receipt-view");
         }
 
-        // UI Feature Modification: Enhanced Ticket Dashboard with Cancellation and Info Modals
-        function renderMyTickets() {
-            const container = document.getElementById('profile-ticket-container');
+        function renderUserTicketsContainer() {
+            const container = document.getElementById("profile-ticket-container");
             container.innerHTML = "";
-            
-            if(userTickets.length === 0) {
-                container.innerHTML = `<p class="text-xs text-gray-500 text-center py-6">최근 예매 및 영수증 발권 내역이 존재하지 않습니다.</p>`;
+
+            if (userTickets.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-500 text-center py-6">시스템에 등록된 확정 예매 내역이 없습니다.</p>`;
                 return;
             }
-            
+
             userTickets.forEach(t => {
-                const item = document.createElement('div');
-                item.className = "bg-neutral-950 border border-gray-800 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs";
-                item.innerHTML = `
-                    <div class="space-y-1 flex-1 cursor-pointer" onclick="openTicketInfoModal('${t.id}')" title="티켓 상세 정보 보기">
-                        <p class="font-bold text-sm text-amber-400 hover:underline flex items-center gap-1">
-                            <span>${t.movieTitle}</span> <i class="fa-solid fa-circle-info text-[10px] text-gray-500"></i>
-                        </p>
-                        <p class="text-gray-300">${t.theater} | ${t.hall} | <span class="text-red-400 font-bold">${t.seat}좌석</span></p>
-                        <p class="text-[10px] text-gray-500">발권 고유 ID: ${t.id}</p>
-                    </div>
-                    <div class="w-full sm:w-auto flex items-center gap-2 border-t sm:border-t-0 border-gray-900 pt-2 sm:pt-0">
-                        <button onclick="executeCancelTicket('${t.id}')" class="bg-neutral-900 hover:bg-red-950 text-gray-400 hover:text-red-400 border border-gray-800 hover:border-red-900 px-2.5 py-1.5 rounded transition font-medium">
-                            예매 취소
-                        </button>
-                        <span class="bg-emerald-950 text-emerald-400 border border-emerald-900 px-3 py-1.5 rounded font-bold tracking-wider inline-block">발권 완료</span>
+                container.innerHTML += `
+                    <div class="bg-neutral-950 border border-gray-800 p-4 rounded-xl flex justify-between items-center text-xs">
+                        <div onclick="openTicketInfoModal('${t.ticketId}')" class="cursor-pointer space-y-1 flex-1">
+                            <p class="font-bold text-amber-400 hover:underline flex items-center gap-1">
+                                ${t.movieTitle} <i class="fa-solid fa-id-card-clip text-gray-600 text-[10px]"></i>
+                            </p>
+                            <p class="text-gray-400 text-[11px]">${t.theaterName} | ${t.hall} | <span class="text-red-400 font-bold">${t.seatId}</span></p>
+                        </div>
+                        <button onclick="executeCancelTicket('${t.ticketId}')" class="bg-neutral-900 hover:bg-red-950 text-gray-400 hover:text-red-400 border border-gray-800 px-3 py-1.5 rounded transition">예매 취소</button>
                     </div>
                 `;
-                container.appendChild(item);
             });
         }
 
-        // UI Feature Addition: Action handling logic for ticket entry revocations
         function executeCancelTicket(ticketId) {
-            if(!confirm("선택하신 영화 티켓 예매를 취소하시겠습니까? 취소 즉시 좌석이 반환됩니다.")) return;
+            if (!confirm("선택하신 모바일 티켓 영수증 발권을 전면 취소하시겠습니까?")) return;
+
+            const tIdx = userTickets.findIndex(t => t.ticketId === ticketId);
+            if (tIdx === -1) return;
+
+            const targetTicket = userTickets[tIdx];
+            const sch = schedules.find(s => s.time === targetTicket.time && s.theaterName === targetTicket.theaterName);
             
-            const ticketIndex = userTickets.findIndex(t => t.id === ticketId);
-            if(ticketIndex === -1) return;
-            
-            const ticket = userTickets[ticketIndex];
-            const sch = schedules.find(s => s.id === ticket.scheduleId);
-            if(sch) {
-                sch.reservedSeats = sch.reservedSeats.filter(seat => seat !== ticket.seat);
+            if (sch) {
+                sch.reservedSeats = sch.reservedSeats.filter(seat => seat !== targetTicket.seatId);
             }
-            
-            userTickets.splice(ticketIndex, 1);
-            alert("예매 취소 처리가 완료되었습니다. 금액이 전액 환불됩니다.");
-            
-            renderMyTickets();
-            updateAdminDashboard();
+
+            userTickets.splice(tIdx, 1);
+            renderUserTicketsContainer();
+            alert("환불 및 예매 데이터 소거가 완결되었습니다.");
         }
 
-        // UI Feature Addition: Detail Modal Inspection Engine Functions
         function openTicketInfoModal(ticketId) {
-            const ticket = userTickets.find(t => t.id === ticketId);
-            if(!ticket) return;
-            
-            const modal = document.getElementById('ticket-info-modal');
-            const content = document.getElementById('modal-info-content');
-            
+            const ticket = userTickets.find(t => t.ticketId === ticketId);
+            if (!ticket) return;
+
+            const content = document.getElementById("modal-info-content");
             content.innerHTML = `
-                <div class="space-y-1.5 border-b border-gray-800 pb-2 mb-2">
-                    <p class="text-gray-400">영화 타이틀</p>
-                    <p class="text-sm font-bold text-white">${ticket.movieTitle}</p>
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <p class="text-gray-400">상영 극장</p>
-                        <p class="font-bold text-white">${ticket.theater}</p>
-                    </div>
-                    <div>
-                        <p class="text-gray-400">지정 상영관</p>
-                        <p class="font-bold text-white">${ticket.hall}</p>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-2 mt-2">
-                    <div>
-                        <p class="text-gray-400">상영 시작 시간</p>
-                        <p class="font-bold text-amber-400">${ticket.time}</p>
-                    </div>
-                    <div>
-                        <p class="text-gray-400">예매 좌석 번호</p>
-                        <p class="font-bold text-red-400">${ticket.seat}</p>
-                    </div>
-                </div>
-                <div class="space-y-1.5 border-t border-gray-800 pt-2 mt-2">
-                    <p class="text-gray-400">결제 승인 일시</p>
-                    <p class="text-gray-300">${ticket.date}</p>
-                    <p class="text-gray-400 mt-1">영수증 거래 금액</p>
-                    <p class="font-bold text-emerald-400">₩ ${ticket.price.toLocaleString()} (원화 결제 완료)</p>
-                </div>
+                <p><strong>발권 번호:</strong> ${ticket.ticketId}</p>
+                <p><strong>영화 제목:</strong> ${ticket.movieTitle}</p>
+                <p><strong>상영 극장:</strong> ${ticket.theaterName} (${ticket.hall})</p>
+                <p><strong>상영 시간:</strong> ${ticket.time} | <strong>지정 좌석:</strong> ${ticket.seatId}</p>
+                <p><strong>결제 일시:</strong> ${ticket.date}</p>
+                <p class="border-t border-gray-800 pt-2 font-bold text-emerald-400">결제 금액: ₩ ${ticket.price.toLocaleString()}</p>
             `;
-            modal.classList.remove('hidden');
+            document.getElementById("ticket-info-modal").classList.remove("hidden");
         }
 
         function closeTicketInfoModal() {
-            document.getElementById('ticket-info-modal').classList.add('hidden');
+            document.getElementById("ticket-info-modal").classList.add("hidden");
         }
 
-        // UI Feature Addition: Admin data input pipeline handling
+        function renderAdminDashboard() {
+            let totalSales = 0;
+            let totalTickets = 0;
+            const tableBody = document.getElementById("admin-table-body");
+            tableBody.innerHTML = "";
+
+            schedules.forEach(s => {
+                const movie = movies.find(m => m.id === s.movieId);
+                const title = movie ? movie.title : "알 수 없음";
+                const ticketsCount = s.reservedSeats.length;
+                const costPrice = s.price ? s.price : 14000;
+                const sales = ticketsCount * costPrice;
+                const occupancy = ((ticketsCount / 32) * 100).toFixed(1);
+
+                totalSales += sales;
+                totalTickets += ticketsCount;
+
+                tableBody.innerHTML += `
+                    <tr class="hover:bg-neutral-900/50 transition">
+                        <td class="p-3 text-gray-500 font-mono">${s.id}</td>
+                        <td class="p-3 font-bold text-white">${title}</td>
+                        <td class="p-3">${s.theaterName} <span class="text-gray-500 text-[11px] block mt-0.5">${s.hall}</span></td>
+                        <td class="p-3 text-amber-400 font-medium">${s.time}</td>
+                        <td class="p-3 text-gray-400">₩ ${costPrice.toLocaleString()}</td>
+                        <td class="p-3">${ticketsCount} / 32 <span class="text-blue-400 ml-1">(${occupancy}%)</span></td>
+                        <td class="p-3 font-bold text-emerald-400">₩ ${sales.toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById("admin-widget-sales").innerText = `₩ ${totalSales.toLocaleString()}`;
+            document.getElementById("admin-widget-tickets").innerText = `${totalTickets} 건`;
+            const totalCapacity = schedules.length * 32;
+            const globalOccupancy = totalCapacity > 0 ? ((totalTickets / totalCapacity) * 100).toFixed(1) : "0.0";
+            document.getElementById("admin-widget-occupancy").innerText = `${globalOccupancy} %`;
+        }
+
         function executeAdminAddMovie(e) {
             e.preventDefault();
-            
-            const title = document.getElementById('admin-add-title').value;
-            const genre = document.getElementById('admin-add-genre').value;
-            const runtime = document.getElementById('admin-add-runtime').value;
-            const poster = document.getElementById('admin-add-poster').value;
-            const plot = document.getElementById('admin-add-plot').value;
-            
-            const newMovieId = "M-0" + (movies.length + 1);
-            
+            const title = document.getElementById("admin-add-title").value;
+            const genre = document.getElementById("admin-add-genre").value;
+            const runtime = document.getElementById("admin-add-runtime").value;
+            const poster = document.getElementById("admin-add-poster").value;
+            const plot = document.getElementById("admin-add-plot").value;
+
+            const nextMovieId = `M-0${movies.length + 1}`;
             const newMovie = {
-                id: newMovieId,
+                id: nextMovieId,
                 title: title,
                 genre: genre,
-                director: "관리자 등록",
-                actors: "현장 캐스팅진",
+                director: "관리자 엔진",
+                actors: "현장 배정 배우진",
                 runtime: runtime,
                 grade: "12세 관람가",
                 plot: plot,
                 poster: poster,
+                trailer: "https://www.youtube.com/embed/eHp3MbsCb3M",
                 reviews: []
             };
-            
+
             movies.push(newMovie);
+
+            alert(`[영화 마스터 등록 완료] "${title}" 영화가 등록되었습니다.\n이제 아래 상영 시간표 추가 모듈에서 상영 일정을 연결할 수 있습니다.`);
             
-            // Generate standard mock timetable paths for the added movie across active locations
-            schedules.push(
-                { id: `S-${movies.length}01`, movieId: newMovieId, theaterName: "CGV 센텀시티", hall: "2관", time: "14:15", reservedSeats: [] },
-                { id: `S-${movies.length}02`, movieId: newMovieId, theaterName: "CGV 강남", hall: "5관", time: "18:30", reservedSeats: [] }
-            );
-            
-            alert(`[데이터베이스 성공] 신규 상영작 "${title}" 등록 완료 및 스케줄러 배정이 완결되었습니다.`);
-            
-            // Flush management form UI fields
-            e.target.reset();
-            
+            document.getElementById("admin-add-title").value = "";
+            document.getElementById("admin-add-genre").value = "";
+            document.getElementById("admin-add-runtime").value = "";
+            document.getElementById("admin-add-poster").value = "";
+            document.getElementById("admin-add-plot").value = "";
+
             renderMovieGrid();
-            updateAdminDashboard();
+            renderAdminDashboard();
+            initAdminDropdownFilters(); 
         }
 
-        function updateAdminDashboard() {
-            let totalSales = 0;
-            let totalReservedSeats = 0;
-            const totalCapacity = schedules.length * 32; 
-            const tbody = document.getElementById('admin-table-body');
-            tbody.innerHTML = "";
+        // =========================================================================
+        // 핵심 개편 부문: 상영 시간표 계층형(Cascade) 신규 추가 데이터 프로세싱 로직
+        // =========================================================================
+        
+        function initAdminDropdownFilters() {
+            const movieSelect = document.getElementById("admin-filter-movie");
+            movieSelect.innerHTML = '<option value="">-- 영화를 고르세요 --</option>';
             
-            schedules.forEach(s => {
-                const movie = movies.find(m => m.id === s.movieId);
-                const title = movie ? movie.title : "알 수 없는 영화";
-                const sales = s.reservedSeats.length * 14000;
-                totalSales += sales;
-                totalReservedSeats += s.reservedSeats.length;
-                
-                const occupancyRate = ((s.reservedSeats.length / 32) * 100).toFixed(1);
-                
-                const row = document.createElement('tr');
-                row.className = "hover:bg-neutral-900/50 transition";
-                row.innerHTML = `
-                    <td class="p-3 font-mono text-gray-400">${s.id}</td>
-                    <td class="p-3 font-bold text-white">${title}</td>
-                    <td class="p-3 text-gray-300">${s.theaterName} (${s.hall})</td>
-                    <td class="p-3 text-amber-400 font-medium">${s.time}</td>
-                    <td class="p-3 text-blue-400">${s.reservedSeats.length} / 32 (${occupancyRate}%)</td>
-                    <td class="p-3 font-bold text-emerald-400">₩ ${sales.toLocaleString()}</td>
-                `;
-                tbody.appendChild(row);
+            movies.forEach(m => {
+                movieSelect.innerHTML += `<option value="${m.id}">${m.title}</option>`;
             });
+
+            resetAdminFilterFields(['region', 'theater']);
+            clearAdminInsertInputs();
+        }
+
+        function onAdminMovieChange(movieId) {
+            resetAdminFilterFields(['region', 'theater']);
+            clearAdminInsertInputs();
+            if (!movieId) return;
+
+            // 전체 지역 인프라 데이터를 가져와 바인딩
+            const regionSelect = document.getElementById("admin-filter-region");
+            regionSelect.innerHTML = '<option value="">-- 지역 선택 --</option>';
             
-            document.getElementById('admin-widget-sales').innerText = `₩ ${totalSales.toLocaleString()}`;
-            document.getElementById('admin-widget-occupancy').innerText = totalCapacity > 0 ? `${((totalReservedSeats / totalCapacity) * 100).toFixed(1)} %` : "0.0 %";
-            document.getElementById('admin-widget-tickets').innerText = `${totalReservedSeats} 건`;
+            regionalInfrastructure.forEach(r => {
+                regionSelect.innerHTML += `<option value="${r.regionId}">${r.regionName}</option>`;
+            });
+            regionSelect.disabled = false;
+        }
+
+        function onAdminRegionChange(regionId) {
+            resetAdminFilterFields(['theater']);
+            clearAdminInsertInputs();
+            if (!regionId) return;
+
+            const regionObj = regionalInfrastructure.find(r => r.regionId === regionId);
+            const theaterSelect = document.getElementById("admin-filter-theater");
+            theaterSelect.innerHTML = '<option value="">-- 극장 선택 --</option>';
+
+            regionObj.theaters.forEach(th => {
+                theaterSelect.innerHTML += `<option value="${th.name}">${th.name}</option>`;
+            });
+            theaterSelect.disabled = false;
+        }
+
+        function onAdminTheaterChange(theaterName) {
+            if (!theaterName) {
+                clearAdminInsertInputs();
+            }
+            // 최종 극장까지 고르면 입력 활성화 준비 상태 도달
+        }
+
+        function executeAdminInsertSchedule(e) {
+            e.preventDefault();
+            
+            const movieId = document.getElementById("admin-filter-movie").value;
+            const theaterName = document.getElementById("admin-filter-theater").value;
+            const hall = document.getElementById("admin-ins-sch-hall").value;
+            const time = document.getElementById("admin-ins-sch-time").value;
+            const price = parseInt(document.getElementById("admin-ins-sch-price").value, 10);
+
+            if (!movieId || !theaterName) {
+                alert("상단 단계별 필터링(영화 ➔ 지역 ➔ 극장)을 먼저 완료해 주십시오.");
+                return;
+            }
+
+            // 고유 상영 ID 자동 할당 알고리즘
+            const newScheduleId = "S-" + Math.floor(Math.random() * 900 + 100);
+
+            const newSchedule = {
+                id: newScheduleId,
+                movieId: movieId,
+                theaterName: theaterName,
+                hall: hall,
+                time: time,
+                price: price,
+                reservedSeats: []
+            };
+
+            // 글로벌 상영 데이터베이스 컬렉션 배열에 추가(Insert)
+            schedules.push(newSchedule);
+
+            const targetMovie = movies.find(m => m.id === movieId);
+            alert(`[SQL INSERT 성공] 신규 상영 스케줄이 등록되었습니다!\n\nID: ${newScheduleId}\n영화: ${targetMovie.title}\n극장: ${theaterName} (${hall})\n시간: ${time}\n가격: ₩${price.toLocaleString()}`);
+            
+            // 입력 폼 리셋 및 뷰 갱신
+            clearAdminInsertInputs();
+            initAdminDropdownFilters();
+            renderAdminDashboard();
+        }
+
+        function resetAdminFilterFields(fieldsArr) {
+            fieldsArr.forEach(f => {
+                const el = document.getElementById(`admin-filter-${f}`);
+                if (el) {
+                    el.innerHTML = `<option value="">-- ${f === 'region' ? '지역' : '극장'} 선택 --</option>`;
+                    el.disabled = true;
+                }
+            });
+        }
+
+        function clearAdminInsertInputs() {
+            document.getElementById("admin-ins-sch-hall").value = "";
+            document.getElementById("admin-ins-sch-time").value = "";
+            document.getElementById("admin-ins-sch-price").value = "";
         }
 
         function exportToExcel() {
-            let dataRows = [];
-            schedules.forEach(s => {
+            let dataRows = schedules.map(s => {
                 const movie = movies.find(m => m.id === s.movieId);
-                const title = movie ? movie.title : "";
-                const sales = s.reservedSeats.length * 14000;
-                dataRows.push({
+                const costPrice = s.price ? s.price : 14000;
+                return {
                     "상영 일정 ID": s.id,
-                    "영화 타이틀": title,
+                    "영화 타이틀": movie ? movie.title : "알 수 없음",
                     "상영 극장": s.theaterName,
-                    "상영관": s.hall,
-                    "상영 시간": s.time,
-                    "예매 좌석수": s.reservedSeats.length,
-                    "누적 매출액(원)": sales
-                });
+                    "상영관 명칭": s.hall,
+                    "편성 시간": s.time,
+                    "티켓 가격": costPrice,
+                    "판매 좌석수": s.reservedSeats.length,
+                    "정산 금액(원)": s.reservedSeats.length * costPrice
+                };
             });
+
             const worksheet = XLSX.utils.json_to_sheet(dataRows);
             const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "매출 통계");
-            XLSX.writeFile(workbook, "MovieTicket_Capstone_Sales_Report.xlsx");
+            XLSX.utils.book_append_sheet(workbook, worksheet, "매출 관리 통계");
+            XLSX.writeFile(workbook, "MovieTicket_Capstone_Report.xlsx");
         }
     </script>
 </body>
