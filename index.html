@@ -834,7 +834,7 @@ let cinemaMap = null;
             try {
                 return JSON.parse(localStorage.getItem(key) || "[]");
             } catch (error) {
-                console.error("Could not load saved tickets.", error);
+                console.error("저장된 예매 내역을 불러올 수 없습니다.", error);
                 return [];
             }
         }
@@ -1110,7 +1110,7 @@ function renderTimeSchedules() {
             const password = document.getElementById("reg-pw").value;
 
             if (!supabaseClient) {
-                alert("Supabase URL and anon key are not set yet. Add them near the top of the script first.");
+                alert("Supabase URL과 anon key가 설정되어 있지 않습니다. 스크립트 상단에 해당 값을 먼저 입력해 주세요.");
                 return;
             }
 
@@ -1135,7 +1135,7 @@ function renderTimeSchedules() {
                 });
             }
 
-            alert("Registration saved in Supabase. If email confirmation is enabled, check your email before logging in.");
+            alert("회원가입이 완료되었습니다. 이메일 인증이 활성화되어 있다면, 로그인하기 전에 이메일에서 인증을 완료해 주세요.");
             toggleAuthTab('login');
         }
 
@@ -1243,7 +1243,7 @@ async function executeSubmitReview(e) {
     e.preventDefault();
 
     if (!currentUser) {
-        alert("ê´€ëžŒí‰ì„ ìž‘ì„±í•˜ì‹œë ¤ë©´ ë¨¼ì € ë¡œê·¸ì¸í•´ ì£¼ì‹­ì‹œì˜¤.");
+        alert("관람평을 작성하시려면 먼저 로그인해 주십시오.");
         navigateTo('auth-view');
         return;
     }
@@ -1283,7 +1283,7 @@ async function executeSubmitReview(e) {
     document.getElementById("review-text").value = "";
     document.getElementById("review-score").value = "5";
     renderMovieReviews();
-    showToast("ì†Œì¤‘í•œ ê´€ëžŒí‰ì´ ì„±ê³µì ìœ¼ë¡œ ë“±ë¡ë˜ì—ˆìŠµë‹ˆë‹¤!");
+    showToast("소중한 관람평이 성공적으로 등록되었습니다!");
 }
 
         function initLeafletMapInfrastructure() {
@@ -1431,12 +1431,12 @@ async function executeSubmitReview(e) {
     loadingOverlay.className = "fixed inset-0 bg-black/90 z-[999] flex flex-col items-center justify-center";
     loadingOverlay.innerHTML = `
         <div class="w-20 h-20 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
-        <p class="mt-6 text-white text-sm">ê²°ì œ ì„œë²„ ì—°ê²° ì¤‘...</p>`;
+        <p class="mt-6 text-white text-sm">결제 서버 연결 중...</p>`;
     document.body.appendChild(loadingOverlay);
 
     try {
         if (!currentUser) {
-            alert("Please login before booking a ticket.");
+            alert("예매를 진행하기 전에 로그인해 주세요.");
             navigateTo("auth-view");
             return;
         }
@@ -1460,7 +1460,7 @@ async function executeSubmitReview(e) {
 
         const alreadyReservedSeats = getReservedSeatsForScheduleDate(selectedSchedule, formattedWatchDate);
         if (alreadyReservedSeats.includes(selectedSeat)) {
-            alert("This seat is already reserved for the selected date. Please choose another seat.");
+            alert("선택하신 날짜에 이미 예매된 좌석입니다. 다른 좌석을 선택해 주세요.");
             navigateTo("reservation-view");
             renderSeatMatrixMap();
             return;
