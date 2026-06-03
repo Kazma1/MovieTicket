@@ -96,40 +96,57 @@
         </section>
 
         <section id="main-view" class="view-section active space-y-8">
-            <div class="relative overflow-hidden rounded-3xl border border-gray-800 bg-gradient-to-r from-black via-neutral-900 to-red-950 p-8 min-h-[360px] flex items-center">
-                <div class="max-w-xl z-10">
-                    <p class="text-red-400 font-bold text-sm tracking-[0.3em] uppercase">NOW SHOWING</p>
-                    <h1 class="text-5xl font-black mt-4 leading-tight">INSIDE OUT 2</h1>
-                    <p class="text-gray-300 mt-4 leading-relaxed text-sm">감정 컨트롤 본부에 새로운 감정들이 등장하면서 벌어지는 초대형 감정 모험.</p>
-                    <div class="flex gap-3 mt-6">
-                        <button onclick="openMovieDetail('M-01')" class="bg-gradient-to-r from-red-500 to-red-700 hover:scale-105 hover:shadow-[0_0_25px_rgba(255,0,0,0.5)] transition-all duration-300 px-6 py-3 rounded-xl font-bold">
-                            <i class="fa-solid fa-ticket mr-2"></i>예매하기
-                        </button>
-                        <button onclick="openMovieDetail('M-01')" class="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl font-bold border border-white/10 transition">
-                            <i class="fa-solid fa-circle-info mr-2"></i>상세정보
-                        </button>
-                    </div>
-                </div>
-                <div class="absolute inset-0 opacity-30 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=1600');"></div>
+    <div class="relative overflow-hidden rounded-3xl border border-gray-800 bg-gradient-to-r from-black via-neutral-900 to-red-950 p-8 min-h-[360px] flex flex-col md:flex-row items-center justify-center gap-10 md:gap-40">
+        
+        <div class="max-w-xl z-10">
+            <p class="text-red-400 font-bold text-sm tracking-[0.3em] uppercase">NOW SHOWING</p>
+            <h1 class="text-5xl font-black mt-4 leading-tight">INSIDE OUT 2</h1>
+            <p class="text-gray-300 mt-4 leading-relaxed text-sm">감정 컨트롤 본부에 새로운 감정들이 등장하면서 벌어지는 초대형 감정 모험.</p>
+            <div class="flex gap-3 mt-6">
+                <button onclick="openMovieDetail('M-01')" class="bg-gradient-to-r from-red-500 to-red-700 hover:scale-105 hover:shadow-[0_0_25px_rgba(255,0,0,0.5)] transition-all duration-300 px-6 py-3 rounded-xl font-bold">
+                    <i class="fa-solid fa-ticket mr-2"></i>예매하기
+                </button>
+                <button onclick="openMovieDetail('M-01')" class="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl font-bold border border-white/10 transition">
+                    <i class="fa-solid fa-circle-info mr-2"></i>상세정보
+                </button>
             </div>
+        </div>
 
-            <div>
-                <h3 class="text-xl font-bold mb-6 flex items-center"><span class="w-1 h-5 bg-cgv-red mr-2 inline-block"></span>현재 상영작 박스오피스</h3>
-                <div class="flex gap-4 mb-8">
-                    <input type="text" id="movie-search" placeholder="영화 검색..." class="flex-1 bg-black/40 border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-red-500">
-                    <select id="genre-filter" class="bg-black/40 border border-white/10 rounded-2xl px-5 py-4">
-                        <option value="">전체 장르</option>
-                        <option value="애니메이션">애니메이션</option>
-                        <option value="액션">액션</option>
-                        <option value="SF">SF</option>
-                        <option value="드라마">드라마</option>
-                        <option value="스릴러">스릴러</option>
-                    </select>
-                </div>
-                <div class="relative">
-                    <div id="movie-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 pb-4 px-0"></div>
-                </div>
-            </div>
+        <div class="z-10 w-36 md:w-48 shrink-0 rounded-xl overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.8)] border border-gray-700 transform rotate-2 hover:rotate-0 hover:scale-105 transition-all duration-500 cursor-pointer" onclick="openMovieDetail('M-01')">
+            <img src="https://image.tmdb.org/t/p/w500/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg" alt="Inside Out 2 Poster" class="w-full h-full object-cover">
+        </div>
+
+        <div class="absolute inset-0 opacity-20 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=1600');"></div>
+    </div>
+
+    <div>
+        <h3 class="text-xl font-bold mb-6 flex items-center"><span class="w-1 h-5 bg-cgv-red mr-2 inline-block"></span>현재 상영작 박스오피스</h3>
+        <div class="flex gap-4 mb-8">
+            <input type="text" id="movie-search" placeholder="영화 검색..." class="flex-1 bg-black/40 border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-red-500">
+            <select id="genre-filter" class="bg-black/40 border border-white/10 rounded-2xl px-5 py-4">
+                <option value="">전체 장르</option>
+                <option value="애니메이션">애니메이션</option>
+                <option value="액션">액션</option>
+                <option value="SF">SF</option>
+                <option value="드라마">드라마</option>
+                <option value="스릴러">스릴러</option>
+            </select>
+        </div>
+        <div class="relative">
+            <div id="movie-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 pb-4 px-0"></div>
+        </div>
+    </div>
+</section>
+
+     
+    
+
+        </div>
+        <div class="relative">
+            <div id="movie-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 pb-4 px-0"></div>
+        </div>
+    </div>
+</section>
         </section>
 
         <section id="detail-view" class="view-section space-y-6">
@@ -161,12 +178,27 @@
                 </div>
             </div>
             <div class="bg-cgv-dark border border-gray-800 rounded-xl p-6 space-y-4">
-                <h4 class="font-bold text-sm text-gray-300 flex items-center justify-between">
-                    <span><i class="fa-regular fa-comment-dots mr-1 cgv-red"></i> 실시간 관람평 및 별점 후기</span>
-                    <span id="detail-avg-stars" class="text-yellow-400 text-xs">평균 평점: 0.0</span>
-                </h4>
-                <div id="review-list" class="space-y-2 divide-y divide-gray-800 text-xs"></div>
-            </div>
+    <h4 class="font-bold text-sm text-gray-300 flex items-center justify-between">
+        <span><i class="fa-regular fa-comment-dots mr-1 cgv-red"></i> 실시간 관람평 및 별점 후기</span>
+        <span id="detail-avg-stars" class="text-yellow-400 text-xs">평균 평점: 0.0</span>
+    </h4>
+    
+    <form id="review-form" onsubmit="executeSubmitReview(event)" class="flex gap-2 border-b border-gray-800 pb-4 mb-4">
+        <select id="review-score" class="bg-neutral-900 border border-gray-700 text-white rounded-lg p-2.5 text-xs focus:border-red-500 outline-none cursor-pointer w-28">
+            <option value="5">★★★★★ 5</option>
+            <option value="4">★★★★☆ 4</option>
+            <option value="3">★★★☆☆ 3</option>
+            <option value="2">★★☆☆☆ 2</option>
+            <option value="1">★☆☆☆☆ 1</option>
+        </select>
+        <input type="text" id="review-text" required placeholder="이 영화에 대한 생생한 관람평을 남겨주세요..." class="flex-1 bg-neutral-900 border border-gray-700 text-white rounded-lg p-2.5 text-xs focus:border-red-500 outline-none shadow-inner">
+        <button type="submit" class="bg-cgv-red hover:bg-red-600 text-white font-bold px-5 rounded-lg text-xs transition shadow-md whitespace-nowrap">
+            등록하기
+        </button>
+    </form>
+    
+    <div id="review-list" class="space-y-3 divide-y divide-gray-800 text-xs max-h-60 overflow-y-auto pr-2 scrollbar-none"></div>
+</div>
         </section>
 
         <section id="theater-view" class="view-section space-y-6">
@@ -200,50 +232,55 @@
         </section>
 
         <section id="reservation-view" class="view-section space-y-6">
-            <button onclick="navigateTo('theater-view')" class="text-xs text-gray-400 hover:text-white flex items-center space-x-1">
-                <i class="fa-solid fa-chevron-left"></i> <span>극장 재선택 단계로 가기</span>
-            </button>
-            <div class="bg-cgv-dark border border-gray-800 rounded-2xl p-6 space-y-6">
-                <div>
-                    <h3 class="text-xl font-bold text-white">
-                        <span id="res-movie-title" class="text-amber-400 mr-1">영화</span> - <span id="res-theater-name" class="text-red-400">극장</span> 스케줄러
-                    </h3>
-                </div>
-                <div class="bg-neutral-900 p-4 rounded-xl border border-gray-800 space-y-3">
-                    <p class="text-xs text-gray-400 font-bold"><i class="fa-regular fa-calendar mr-1 text-red-500"></i> 관람 날짜 선택</p>
-                    <div id="schedule-date-container" class="flex gap-2 overflow-x-auto pb-2 scrollbar-none"></div>
-                </div>
-                <div class="bg-neutral-900 p-4 rounded-xl border border-gray-800 space-y-3">
-                    <p class="text-xs text-gray-400 font-bold"><i class="fa-regular fa-clock mr-1"></i> 당일 배정 상영 시간표 (잔여 좌석 실시간 연동)</p>
-                    <div id="schedule-timeline-container" class="flex flex-wrap gap-3"></div>
-                </div>
-                <div id="seat-map-wrapper" class="bg-neutral-950 p-6 rounded-xl border border-gray-900 text-center space-y-6 hidden">
-                    <div class="w-full bg-gray-800 text-gray-400 text-[10px] font-bold py-1 rounded tracking-[0.8em] uppercase">SCREEN CONTAINER</div>
-                    <div class="flex justify-center space-x-6 text-[11px] text-gray-400">
-                        <div class="flex items-center space-x-1"><span class="w-3 h-3 bg-gray-700 rounded"></span> <span>매진</span></div>
-                        <div class="flex items-center space-x-1"><span class="w-3 h-3 bg-white rounded"></span> <span>예매 가능</span></div>
-                        <div class="flex items-center space-x-1"><span class="w-3 h-3 bg-cgv-red rounded"></span> <span>내 선택 좌석</span></div>
-                    </div>
-                    <div class="flex justify-center overflow-x-auto py-2">
-                        <div id="seat-grid-container" class="grid grid-cols-8 gap-2"></div>
-                    </div>
-                </div>
-                <div id="res-summary-footer" class="border-t border-gray-800 pt-4 flex flex-col md:flex-row justify-between items-center gap-4 hidden">
-                    <div class="text-center md:text-left text-xs">
-                        <p class="text-gray-400">선택한 최종 스케줄 정보</p>
-                        <p class="text-sm font-bold text-white mt-1">
-                            극장: <span id="sum-theater" class="text-red-400">-</span> | 
-                            상영관: <span id="sum-hall" class="text-white">-</span> | 
-                            시간: <span id="sum-time" class="text-amber-400">-</span> | 
-                            좌석: <span id="sum-seat" class="text-cgv-red">-</span>
-                        </p>
-                    </div>
-                    <button onclick="openPaymentModal()" class="w-full md:w-auto bg-amber-500 hover:bg-amber-600 text-black font-extrabold px-8 py-3 rounded-xl text-sm transition shadow-lg">
-                        결제 수단 및 혜택 선택하기
-                    </button>
-                </div>
+    <button onclick="navigateTo('theater-view')" class="text-xs text-gray-400 hover:text-white flex items-center space-x-1">
+        <i class="fa-solid fa-chevron-left"></i> <span>극장 재선택 단계로 가기</span>
+    </button>
+    <div class="bg-cgv-dark border border-gray-800 rounded-2xl p-6 space-y-6">
+        <div>
+            <h3 class="text-xl font-bold text-white">
+                <span id="res-movie-title" class="text-amber-400 mr-1">영화</span> - <span id="res-theater-name" class="text-red-400">극장</span> 스케줄러
+            </h3>
+        </div>
+        
+        <div class="bg-neutral-900 p-4 rounded-xl border border-gray-800 space-y-3">
+            <p class="text-xs text-gray-400 font-bold"><i class="fa-regular fa-calendar mr-1 text-red-500"></i> 1단계: 관람 날짜 선택</p>
+            <div id="schedule-date-container" class="flex gap-2 overflow-x-auto pb-2 scrollbar-none"></div>
+        </div>
+        
+        <div id="time-selection-wrapper" class="bg-neutral-900 p-4 rounded-xl border border-gray-800 space-y-3 hidden">
+            <p class="text-xs text-gray-400 font-bold"><i class="fa-regular fa-clock mr-1"></i> 2단계: 상영 시간표 선택</p>
+            <div id="schedule-timeline-container" class="flex flex-wrap gap-3"></div>
+        </div>
+        
+        <div id="seat-map-wrapper" class="bg-neutral-950 p-6 rounded-xl border border-gray-900 text-center space-y-6 hidden">
+            <p class="text-xs text-gray-400 font-bold text-left"><i class="fa-solid fa-chair mr-1"></i> 3단계: 관람 좌석 선택</p>
+            <div class="w-full bg-gray-800 text-gray-400 text-[10px] font-bold py-1 rounded tracking-[0.8em] uppercase">SCREEN CONTAINER</div>
+            <div class="flex justify-center space-x-6 text-[11px] text-gray-400">
+                <div class="flex items-center space-x-1"><span class="w-3 h-3 bg-gray-700 rounded"></span> <span>매진</span></div>
+                <div class="flex items-center space-x-1"><span class="w-3 h-3 bg-white rounded"></span> <span>예매 가능</span></div>
+                <div class="flex items-center space-x-1"><span class="w-3 h-3 bg-cgv-red rounded"></span> <span>내 선택 좌석</span></div>
             </div>
-        </section>
+            <div class="flex justify-center overflow-x-auto py-2">
+                <div id="seat-grid-container" class="grid grid-cols-8 gap-2"></div>
+            </div>
+        </div>
+        
+        <div id="res-summary-footer" class="border-t border-gray-800 pt-4 flex flex-col md:flex-row justify-between items-center gap-4 hidden">
+            <div class="text-center md:text-left text-xs">
+                <p class="text-gray-400">선택한 최종 스케줄 정보</p>
+                <p class="text-sm font-bold text-white mt-1">
+                    극장: <span id="sum-theater" class="text-red-400">-</span> | 
+                    상영관: <span id="sum-hall" class="text-white">-</span> | 
+                    시간: <span id="sum-time" class="text-amber-400">-</span> | 
+                    좌석: <span id="sum-seat" class="text-cgv-red">-</span>
+                </p>
+            </div>
+            <button onclick="openPaymentModal()" class="w-full md:w-auto bg-amber-500 hover:bg-amber-600 text-black font-extrabold px-8 py-3 rounded-xl text-sm transition shadow-lg">
+                결제 수단 및 혜택 선택하기
+            </button>
+        </div>
+    </div>
+</section>
 
         <section id="payment-view" class="view-section max-w-md mx-auto bg-cgv-dark border border-gray-800 p-6 rounded-2xl shadow-2xl space-y-6">
             <h3 class="text-lg font-bold text-white border-b border-gray-800 pb-2"><i class="fa-solid fa-credit-card mr-1 cgv-red"></i> 안전 결제 프로세스</h3>
@@ -705,33 +742,65 @@
         }
 
         function renderSchedulerDates() {
-            const container = document.getElementById("schedule-date-container");
-            if (!container) return;
-            container.innerHTML = "";
+    const container = document.getElementById("schedule-date-container");
+    if (!container) return;
+    container.innerHTML = "";
 
-            const days = ["일", "월", "화", "수", "목", "금", "토"];
-            const today = new Date();
+    const days = ["일", "월", "화", "수", "목", "금", "토"];
+    const today = new Date();
 
-            for (let i = 0; i < 7; i++) {
-                const d = new Date();
-                d.setDate(today.getDate() + i);
+    for (let i = 0; i < 7; i++) {
+        const d = new Date();
+        d.setDate(today.getDate() + i);
 
-                const btn = document.createElement("button");
-                btn.className = "flex flex-col items-center min-w-[60px] py-2 px-3 rounded-lg border border-gray-700 hover:border-red-500 transition text-xs";
-                btn.innerHTML = `
-                    <span>${days[d.getDay()]}</span>
-                    <span class="font-bold">${d.getDate()}</span>
-                `;
+        const btn = document.createElement("button");
+        btn.className = "flex flex-col items-center min-w-[60px] py-2 px-3 rounded-lg border border-gray-700 hover:border-red-500 transition text-xs";
+        btn.innerHTML = `
+            <span>${days[d.getDay()]}</span>
+            <span class="font-bold">${d.getDate()}</span>
+        `;
 
-                btn.onclick = () => {
-                    document.querySelectorAll("#schedule-date-container > button").forEach(b => b.classList.remove("border-red-500", "bg-neutral-800"));
-                    btn.classList.add("border-red-500", "bg-neutral-800");
-                    selectedReservationData.date = d;
-                };
+        btn.onclick = () => {
+            document.querySelectorAll("#schedule-date-container > button").forEach(b => b.classList.remove("border-red-500", "bg-neutral-800"));
+            btn.classList.add("border-red-500", "bg-neutral-800");
+            selectedReservationData.date = d;
 
-                container.appendChild(btn);
-            }
-        }
+            // 날짜를 바꿀 때마다 좌석 선택은 다시 숨깁니다.
+            selectedSeat = null;
+            document.getElementById("seat-map-wrapper").classList.add("hidden");
+            document.getElementById("res-summary-footer").classList.add("hidden");
+
+            // 날짜를 선택했으므로 상영 시간표를 보여줍니다.
+            renderTimeSchedules();
+        };
+
+        container.appendChild(btn);
+    }
+}
+// 날짜가 선택되었을 때 상영 시간표를 렌더링하고 노출하는 함수
+function renderTimeSchedules() {
+    // 숨겨져 있던 시간 선택 영역을 보여줍니다.
+    document.getElementById("time-selection-wrapper").classList.remove("hidden");
+    
+    const schTimeline = document.getElementById("schedule-timeline-container");
+    schTimeline.innerHTML = "";
+
+    const matchedSchedules = schedules.filter(s => s.movieId === selectedMovie.id && s.theaterName === selectedTheater);
+
+    if (matchedSchedules.length === 0) {
+        schTimeline.innerHTML = `<p class="text-xs text-gray-500 py-2">지정하신 날짜/극장에 편성된 상영 스케줄이 없습니다.</p>`;
+    } else {
+        matchedSchedules.forEach(sch => {
+            const remainingSeats = 32 - sch.reservedSeats.length;
+            schTimeline.innerHTML += `
+                <button onclick="selectActiveTimeScheduler('${sch.id}')" class="border border-gray-700 bg-neutral-800 hover:border-amber-500 rounded-xl p-3 text-center transition flex flex-col items-center min-w-[100px]">
+                    <span class="text-sm font-black text-amber-400">${sch.time}</span>
+                    <span class="text-[10px] text-gray-400 mt-0.5">${sch.hall}</span>
+                    <span class="text-[9px] text-emerald-400 mt-1 bg-emerald-950/50 px-1.5 py-0.5 rounded">${remainingSeats}석 잔여</span>
+                </button>`;
+        });
+    }
+}
 
         function handleNavAuthClick() {
             if (currentUser) {
@@ -825,39 +894,77 @@
         }
 
         function openMovieDetail(movieId) {
-            selectedMovie = movies.find(m => m.id === movieId);
-            if (!selectedMovie) return;
+    selectedMovie = movies.find(m => m.id === movieId);
+    if (!selectedMovie) return;
 
-            document.getElementById("detail-poster").src = selectedMovie.poster;
-            document.getElementById("detail-title").innerText = selectedMovie.title;
-            document.getElementById("detail-meta").innerText = `${selectedMovie.genre} | 감독: ${selectedMovie.director} | 상영시간: ${selectedMovie.runtime}`;
-            document.getElementById("detail-plot").innerText = selectedMovie.plot;
-            document.getElementById("detail-video-iframe").src = selectedMovie.trailer;
+    document.getElementById("detail-poster").src = selectedMovie.poster;
+    document.getElementById("detail-title").innerText = selectedMovie.title;
+    document.getElementById("detail-meta").innerText = `${selectedMovie.genre} | 감독: ${selectedMovie.director} | 상영시간: ${selectedMovie.runtime}`;
+    document.getElementById("detail-plot").innerText = selectedMovie.plot;
+    document.getElementById("detail-video-iframe").src = selectedMovie.trailer;
 
-            const reviewList = document.getElementById("review-list");
-            reviewList.innerHTML = "";
-            let totalScore = 0;
-            
-            if (selectedMovie.reviews.length === 0) {
-                reviewList.innerHTML = `<p class="text-gray-500 text-center py-4">등록된 누적 관람평 후기 데이터가 존재하지 않습니다.</p>`;
-            } else {
-                selectedMovie.reviews.forEach(r => {
-                    totalScore += r.score;
-                    reviewList.innerHTML += `
-                        <div class="py-2.5 first:pt-0">
-                            <div class="flex justify-between text-gray-400 text-[10px] mb-1">
-                                <span class="font-bold text-gray-300"><i class="fa-regular fa-user mr-1 text-gray-600"></i>${r.user}</span>
-                                <span class="text-yellow-500">${"★".repeat(r.score)}</span>
-                            </div>
-                            <p class="text-gray-300 pl-4 relative"><span class="absolute left-0 text-red-500/40">"</span>${r.text}</p>
-                        </div>`;
-                });
-            }
-            const avg = selectedMovie.reviews.length > 0 ? (totalScore / selectedMovie.reviews.length).toFixed(1) : "0.0";
-            document.getElementById("detail-avg-stars").innerText = `평균 평점: ★ ${avg}`;
+    // 분리된 리뷰 렌더링 함수 호출
+    renderMovieReviews();
 
-            navigateTo("detail-view");
-        }
+    navigateTo("detail-view");
+}
+
+// 🌟 새로 추가된 함수: 리뷰 리스트 및 평균 평점을 다시 그려줍니다.
+function renderMovieReviews() {
+    const reviewList = document.getElementById("review-list");
+    reviewList.innerHTML = "";
+    let totalScore = 0;
+    
+    if (selectedMovie.reviews.length === 0) {
+        reviewList.innerHTML = `<p class="text-gray-500 text-center py-4">등록된 누적 관람평 후기 데이터가 존재하지 않습니다. 첫 번째 리뷰를 남겨보세요!</p>`;
+    } else {
+        selectedMovie.reviews.forEach(r => {
+            totalScore += r.score;
+            reviewList.innerHTML += `
+                <div class="py-3 first:pt-0">
+                    <div class="flex justify-between text-gray-400 text-[10px] mb-1.5">
+                        <span class="font-bold text-gray-300"><i class="fa-solid fa-user-circle mr-1 text-gray-600"></i>${r.user}</span>
+                        <span class="text-yellow-500">${"★".repeat(r.score)}<span class="text-gray-600">${"★".repeat(5 - r.score)}</span></span>
+                    </div>
+                    <p class="text-gray-300 pl-4 relative leading-relaxed"><span class="absolute left-0 text-red-500/40">"</span>${r.text}</p>
+                </div>`;
+        });
+    }
+    const avg = selectedMovie.reviews.length > 0 ? (totalScore / selectedMovie.reviews.length).toFixed(1) : "0.0";
+    document.getElementById("detail-avg-stars").innerText = `평균 평점: ★ ${avg}`;
+}
+
+// 🌟 새로 추가된 함수: 사용자가 리뷰 폼을 제출했을 때 실행됩니다.
+function executeSubmitReview(e) {
+    e.preventDefault(); // 폼 제출 시 페이지가 새로고침 되는 것을 막습니다.
+
+    // 1. 로그인 여부 확인
+    if (!currentUser) {
+        alert("관람평을 작성하시려면 먼저 로그인해 주십시오.");
+        navigateTo('auth-view');
+        return;
+    }
+
+    // 2. 폼 데이터 가져오기
+    const score = parseInt(document.getElementById("review-score").value, 10);
+    const text = document.getElementById("review-text").value;
+
+    // 3. 새로운 리뷰 객체 생성 및 배열 맨 앞에 추가
+    const newReview = {
+        user: currentUser.name, // 현재 로그인한 유저 이름 사용
+        text: text,
+        score: score
+    };
+    selectedMovie.reviews.unshift(newReview); 
+
+    // 4. 입력창 초기화
+    document.getElementById("review-text").value = "";
+    document.getElementById("review-score").value = "5";
+
+    // 5. 화면(리뷰 리스트) 즉시 다시 그리기 및 알림창
+    renderMovieReviews();
+    showToast("소중한 관람평이 성공적으로 등록되었습니다!");
+}
 
         function initLeafletMapInfrastructure() {
             cinemaMap = L.map('cinema-map-container').setView([36.2681, 127.6358], 7);
@@ -908,32 +1015,17 @@
         }
 
         function selectTheaterInfrastructure(theaterName) {
-            selectedTheater = theaterName;
-            document.getElementById("res-movie-title").innerText = selectedMovie.title;
-            document.getElementById("res-theater-name").innerText = selectedTheater;
+    selectedTheater = theaterName;
+    document.getElementById("res-movie-title").innerText = selectedMovie.title;
+    document.getElementById("res-theater-name").innerText = selectedTheater;
 
-            const schTimeline = document.getElementById("schedule-timeline-container");
-            schTimeline.innerHTML = "";
-
-            const matchedSchedules = schedules.filter(s => s.movieId === selectedMovie.id && s.theaterName === selectedTheater);
-
-            if (matchedSchedules.length === 0) {
-                schTimeline.innerHTML = `<p class="text-xs text-gray-500 py-2">지정하신 극장에 당일 편성된 상영 스케줄이 없습니다.</p>`;
-                document.getElementById("seat-map-wrapper").classList.add("hidden");
-                document.getElementById("res-summary-footer").classList.add("hidden");
-            } else {
-                matchedSchedules.forEach(sch => {
-                    const remainingSeats = 32 - sch.reservedSeats.length;
-                    schTimeline.innerHTML += `
-                        <button onclick="selectActiveTimeScheduler('${sch.id}')" class="border border-gray-700 bg-neutral-800 hover:border-amber-500 rounded-xl p-3 text-center transition flex flex-col items-center min-w-[100px]">
-                            <span class="text-sm font-black text-amber-400">${sch.time}</span>
-                            <span class="text-[10px] text-gray-400 mt-0.5">${sch.hall}</span>
-                            <span class="text-[9px] text-emerald-400 mt-1 bg-emerald-950/50 px-1.5 py-0.5 rounded">${remainingSeats}석 잔여</span>
-                        </button>`;
-                });
-            }
-            navigateTo("reservation-view");
-        }
+    // 극장 진입 시 시간표와 좌석표를 숨기고 초기화합니다.
+    document.getElementById("time-selection-wrapper").classList.add("hidden");
+    document.getElementById("seat-map-wrapper").classList.add("hidden");
+    document.getElementById("res-summary-footer").classList.add("hidden");
+    
+    navigateTo("reservation-view");
+}
 
         function selectActiveTimeScheduler(scheduleId) {
             selectedSchedule = schedules.find(s => s.id === scheduleId);
@@ -1014,35 +1106,43 @@
         }
 
         function executeFinalPaymentProcessing() {
-            const loadingOverlay = document.createElement('div');
-            loadingOverlay.id = "loading-overlay";
-            loadingOverlay.className = "fixed inset-0 bg-black/90 z-[999] flex flex-col items-center justify-center";
-            loadingOverlay.innerHTML = `
-                <div class="w-20 h-20 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
-                <p class="mt-6 text-white text-sm">결제 서버 연결 중...</p>`;
-            document.body.appendChild(loadingOverlay);
+    const loadingOverlay = document.createElement('div');
+    loadingOverlay.id = "loading-overlay";
+    loadingOverlay.className = "fixed inset-0 bg-black/90 z-[999] flex flex-col items-center justify-center";
+    loadingOverlay.innerHTML = `
+        <div class="w-20 h-20 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+        <p class="mt-6 text-white text-sm">결제 서버 연결 중...</p>`;
+    document.body.appendChild(loadingOverlay);
 
-            setTimeout(() => {
-                document.getElementById('loading-overlay').remove();
-                selectedSchedule.reservedSeats.push(selectedSeat);
+    setTimeout(() => {
+        document.getElementById('loading-overlay').remove();
+        selectedSchedule.reservedSeats.push(selectedSeat);
 
-                const ticketPrice = selectedSchedule.price ? selectedSchedule.price : 14000;
-                const newTicket = {
-                    ticketId: "TKT-" + Math.floor(Math.random() * 900000 + 100000),
-                    movieTitle: selectedMovie.title,
-                    theaterName: selectedSchedule.theaterName,
-                    hall: selectedSchedule.hall,
-                    time: selectedSchedule.time,
-                    seatId: selectedSeat,
-                    price: ticketPrice,
-                    date: new Date().toLocaleString('ko-KR')
-                };
-
-                userTickets.unshift(newTicket);
-                renderUserTicketsContainer();
-                navigateTo("receipt-view");
-            }, 2500);
+        // 선택한 관람 날짜 포맷팅 (예: 2024년 6월 15일)
+        let formattedWatchDate = "지정 안됨";
+        if (selectedReservationData.date) {
+            const d = selectedReservationData.date;
+            formattedWatchDate = `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
         }
+
+        const ticketPrice = selectedSchedule.price ? selectedSchedule.price : 14000;
+        const newTicket = {
+            ticketId: "TKT-" + Math.floor(Math.random() * 900000 + 100000),
+            movieTitle: selectedMovie.title,
+            theaterName: selectedSchedule.theaterName,
+            hall: selectedSchedule.hall,
+            watchDate: formattedWatchDate, // <-- 새로 추가된 관람 일자
+            time: selectedSchedule.time,
+            seatId: selectedSeat,
+            price: ticketPrice,
+            payDate: new Date().toLocaleString('ko-KR') // 기존 결제 일시 이름 변경
+        };
+
+        userTickets.unshift(newTicket);
+        renderUserTicketsContainer();
+        navigateTo("receipt-view");
+    }, 2500);
+}
 
         function renderUserTicketsContainer() {
             const container = document.getElementById("profile-ticket-container");
@@ -1086,19 +1186,21 @@
         }
 
         function openTicketInfoModal(ticketId) {
-            const ticket = userTickets.find(t => t.ticketId === ticketId);
-            if (!ticket) return;
+    const ticket = userTickets.find(t => t.ticketId === ticketId);
+    if (!ticket) return;
 
-            const content = document.getElementById("modal-info-content");
-            content.innerHTML = `
-                <p><strong>발권 번호:</strong> ${ticket.ticketId}</p>
-                <p><strong>영화 제목:</strong> ${ticket.movieTitle}</p>
-                <p><strong>상영 극장:</strong> ${ticket.theaterName} (${ticket.hall})</p>
-                <p><strong>상영 시간:</strong> ${ticket.time} | <strong>지정 좌석:</strong> ${ticket.seatId}</p>
-                <p><strong>결제 일시:</strong> ${ticket.date}</p>
-                <p class="border-t border-gray-800 pt-2 font-bold text-emerald-400">결제 금액: ₩ ${ticket.price.toLocaleString()}</p>`;
-            document.getElementById("ticket-info-modal").classList.remove("hidden");
-        }
+    const content = document.getElementById("modal-info-content");
+    content.innerHTML = `
+        <p><strong>발권 번호:</strong> ${ticket.ticketId}</p>
+        <p><strong>영화 제목:</strong> ${ticket.movieTitle}</p>
+        <p><strong>상영 극장:</strong> ${ticket.theaterName} (${ticket.hall})</p>
+        <p class="text-amber-400"><strong>관람 일시:</strong> ${ticket.watchDate} | ${ticket.time}</p>
+        <p><strong>지정 좌석:</strong> <span class="text-red-400 font-bold">${ticket.seatId}</span></p>
+        <p class="text-[10px] text-gray-500 mt-2"><strong>결제 승인 일시:</strong> ${ticket.payDate}</p>
+        <p class="border-t border-gray-800 pt-2 font-bold text-emerald-400">결제 금액: ₩ ${ticket.price.toLocaleString()}</p>`;
+    
+    document.getElementById("ticket-info-modal").classList.remove("hidden");
+}
 
         function showToast(message) {
             const toast = document.createElement('div');
