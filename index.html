@@ -6,6 +6,7 @@
     <title>MovieTicket</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -137,10 +138,6 @@
         </div>
     </div>
 </section>
-
-     
-    
-
         </div>
         <div class="relative">
             <div id="movie-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 pb-4 px-0"></div>
@@ -516,7 +513,117 @@
     </footer>
 
     <script>
-        let cinemaMap = null;
+                const SUPABASE_URL = "https://xdycqmxosddhngldnwak.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_Zu9WGgN-wqfKG8yqH2ShFw_MwgJJsOB";
+        const isSupabaseConfigured = SUPABASE_URL.startsWith("https://") && !SUPABASE_URL.includes("YOUR_") && !SUPABASE_ANON_KEY.includes("YOUR_");
+        const supabaseClient = isSupabaseConfigured ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+        function mapSupabaseSchedule(row) {
+            return {
+                id: row.id,
+                movieId: row.movie_id,
+                theaterName: row.theater_name,
+                hall: row.hall,
+                time: row.show_time,
+                price: row.price,
+                reservedSeats: row.reserved_seats || []
+            };
+        }
+
+        function mapSupabaseReview(row) {
+            return {
+                id: row.id,
+                user: row.user_name,
+                text: row.review_text,
+                score: row.score,
+                createdAt: row.created_at
+            };
+        }
+
+        async function loadSupabaseSession() {
+            if (!supabaseClient) return;
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session?.user) {
+                currentUser = null;
+                userTickets = [];
+                return;
+            }
+
+            const { data: profile } = await supabaseClient
+                .from("profiles")
+                .select("id,email,name,phone,is_admin")
+                .eq("id", session.user.id)
+                .maybeSingle();
+
+            currentUser = {
+                id: session.user.id,
+                email: session.user.email,
+                name: profile?.name || session.user.email.split("@")[0],
+                phone: profile?.phone || "",
+                isAdmin: Boolean(profile?.is_admin)
+            };
+            await loadUserTicketsFromSupabase();
+        }
+
+        async function loadUserTicketsFromSupabase() {
+            if (!supabaseClient || !currentUser?.id) return;
+            const { data, error } = await supabaseClient
+                .from("reservations")
+                .select("id,ticket_id,movie_title,theater_name,hall,watch_date,show_time,seat_id,price,created_at,schedule_id")
+                .eq("user_id", currentUser.id)
+                .order("created_at", { ascending: false });
+
+            if (error) {
+                console.error(error);
+                return;
+            }
+
+            userTickets = (data || []).map(t => ({
+                id: t.id,
+                ticketId: t.ticket_id,
+                movieTitle: t.movie_title,
+                theaterName: t.theater_name,
+                hall: t.hall,
+                watchDate: t.watch_date || "Not selected",
+                time: t.show_time,
+                seatId: t.seat_id,
+                price: t.price,
+                payDate: new Date(t.created_at).toLocaleString("ko-KR"),
+                scheduleId: t.schedule_id
+            }));
+        }
+
+        async function loadSchedulesFromSupabase() {
+            if (!supabaseClient) return;
+            const { data, error } = await supabaseClient.from("schedules").select("*");
+            if (error) {
+                console.error(error);
+                return;
+            }
+            if (data?.length) schedules = data.map(mapSupabaseSchedule);
+        }
+
+        async function loadReviewsForSelectedMovie() {
+            if (!supabaseClient || !selectedMovie) return;
+            const { data, error } = await supabaseClient
+                .from("reviews")
+                .select("id,user_name,review_text,score,created_at")
+                .eq("movie_id", selectedMovie.id)
+                .order("created_at", { ascending: false });
+
+            if (error) {
+                console.error(error);
+                return;
+            }
+            selectedMovie.reviews = (data || []).map(mapSupabaseReview);
+        }
+
+        async function refreshSupabaseData() {
+            if (!supabaseClient) return;
+            await loadSupabaseSession();
+            await loadSchedulesFromSupabase();
+        }
+let cinemaMap = null;
         let mapMarkers = [];
 
         let movies = [
@@ -665,7 +772,8 @@
             }, 1800);
         });
 
-        window.onload = function() {
+        window.onload = async function() {
+            await refreshSupabaseData();
             initAppSession();
             renderMovieGrid();
             
@@ -802,8 +910,9 @@ function renderTimeSchedules() {
     }
 }
 
-        function handleNavAuthClick() {
+        async function handleNavAuthClick() {
             if (currentUser) {
+                if (supabaseClient) await supabaseClient.auth.signOut();
                 currentUser = null;
                 userTickets = [];
                 initAppSession();
@@ -833,32 +942,97 @@ function renderTimeSchedules() {
             }
         }
 
-        function executeLogin(e) {
+                async function executeLogin(e) {
             e.preventDefault();
-            const email = document.getElementById("login-email").value;
-            currentUser = {
-                email: email,
-                name: email.split('@')[0],
-                phone: "010-1234-5678",
-                isAdmin: true
-            };
+            const email = document.getElementById("login-email").value.trim();
+            const password = document.getElementById("login-pw").value;
+
+            if (!supabaseClient) {
+                currentUser = {
+                    email: email,
+                    name: email.split('@')[0],
+                    phone: "010-1234-5678",
+                    isAdmin: true
+                };
+                initAppSession();
+                showToast(`Welcome, ${currentUser.name}!`);
+                navigateTo("main-view");
+                return;
+            }
+
+            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) {
+                alert("Login failed: " + error.message);
+                return;
+            }
+
+            await loadSupabaseSession();
             initAppSession();
-            showToast(`${currentUser.name}님 환영합니다!`);
+            showToast(`Welcome, ${currentUser.name}!`);
             navigateTo("main-view");
         }
 
-        function executeRegister(e) {
+        async function executeRegister(e) {
             e.preventDefault();
-            alert("회원가입 트랜잭션이 데이터베이스 커밋 단계에 도달했습니다.");
+            const name = document.getElementById("reg-name").value.trim();
+            const phone = document.getElementById("reg-phone").value.trim();
+            const email = document.getElementById("reg-email").value.trim();
+            const password = document.getElementById("reg-pw").value;
+
+            if (!supabaseClient) {
+                alert("Supabase URL and anon key are not set yet. Add them near the top of the script first.");
+                return;
+            }
+
+            const { data, error } = await supabaseClient.auth.signUp({
+                email,
+                password,
+                options: { data: { name, phone } }
+            });
+
+            if (error) {
+                alert("Registration failed: " + error.message);
+                return;
+            }
+
+            if (data.user) {
+                await supabaseClient.from("profiles").upsert({
+                    id: data.user.id,
+                    email,
+                    name,
+                    phone,
+                    is_admin: false
+                });
+            }
+
+            alert("Registration saved in Supabase. If email confirmation is enabled, check your email before logging in.");
             toggleAuthTab('login');
         }
 
-        function executeUpdateProfile(e) {
+        async function executeUpdateProfile(e) {
             e.preventDefault();
-            currentUser.name = document.getElementById("prof-name").value;
-            currentUser.phone = document.getElementById("prof-phone").value;
+            if (!currentUser) return;
+
+            currentUser.name = document.getElementById("prof-name").value.trim();
+            currentUser.phone = document.getElementById("prof-phone").value.trim();
+
+            if (supabaseClient) {
+                const { error } = await supabaseClient.from("profiles").upsert({
+                    id: currentUser.id,
+                    email: currentUser.email,
+                    name: currentUser.name,
+                    phone: currentUser.phone,
+                    is_admin: Boolean(currentUser.isAdmin)
+                });
+
+                if (error) {
+                    alert("Profile update failed: " + error.message);
+                    return;
+                }
+            }
+
             initAppSession();
-            alert("회원 정보 테이블 변경 처리가 완결되었습니다.");
+            alert("Profile updated.");
         }
 
         function renderMovieGrid(movieList = movies) {
@@ -893,7 +1067,7 @@ function renderTimeSchedules() {
             });
         }
 
-        function openMovieDetail(movieId) {
+        async function openMovieDetail(movieId) {
     selectedMovie = movies.find(m => m.id === movieId);
     if (!selectedMovie) return;
 
@@ -903,7 +1077,7 @@ function renderTimeSchedules() {
     document.getElementById("detail-plot").innerText = selectedMovie.plot;
     document.getElementById("detail-video-iframe").src = selectedMovie.trailer;
 
-    // 분리된 리뷰 렌더링 함수 호출
+    if (supabaseClient) await loadReviewsForSelectedMovie();
     renderMovieReviews();
 
     navigateTo("detail-view");
@@ -935,35 +1109,51 @@ function renderMovieReviews() {
 }
 
 // 🌟 새로 추가된 함수: 사용자가 리뷰 폼을 제출했을 때 실행됩니다.
-function executeSubmitReview(e) {
-    e.preventDefault(); // 폼 제출 시 페이지가 새로고침 되는 것을 막습니다.
+async function executeSubmitReview(e) {
+    e.preventDefault();
 
-    // 1. 로그인 여부 확인
     if (!currentUser) {
-        alert("관람평을 작성하시려면 먼저 로그인해 주십시오.");
+        alert("ê´€ëžŒí‰ì„ ìž‘ì„±í•˜ì‹œë ¤ë©´ ë¨¼ì € ë¡œê·¸ì¸í•´ ì£¼ì‹­ì‹œì˜¤.");
         navigateTo('auth-view');
         return;
     }
 
-    // 2. 폼 데이터 가져오기
     const score = parseInt(document.getElementById("review-score").value, 10);
-    const text = document.getElementById("review-text").value;
+    const text = document.getElementById("review-text").value.trim();
+    if (!text) return;
 
-    // 3. 새로운 리뷰 객체 생성 및 배열 맨 앞에 추가
     const newReview = {
-        user: currentUser.name, // 현재 로그인한 유저 이름 사용
+        user: currentUser.name,
         text: text,
         score: score
     };
-    selectedMovie.reviews.unshift(newReview); 
 
-    // 4. 입력창 초기화
+    if (supabaseClient) {
+        const { data, error } = await supabaseClient
+            .from("reviews")
+            .insert({
+                movie_id: selectedMovie.id,
+                user_id: currentUser.id,
+                user_name: currentUser.name,
+                score,
+                review_text: text
+            })
+            .select("id,user_name,review_text,score,created_at")
+            .single();
+
+        if (error) {
+            alert("Review save failed: " + error.message);
+            return;
+        }
+        selectedMovie.reviews.unshift(mapSupabaseReview(data));
+    } else {
+        selectedMovie.reviews.unshift(newReview);
+    }
+
     document.getElementById("review-text").value = "";
     document.getElementById("review-score").value = "5";
-
-    // 5. 화면(리뷰 리스트) 즉시 다시 그리기 및 알림창
     renderMovieReviews();
-    showToast("소중한 관람평이 성공적으로 등록되었습니다!");
+    showToast("ì†Œì¤‘í•œ ê´€ëžŒí‰ì´ ì„±ê³µì ìœ¼ë¡œ ë“±ë¡ë˜ì—ˆìŠµë‹ˆë‹¤!");
 }
 
         function initLeafletMapInfrastructure() {
@@ -1105,24 +1295,28 @@ function executeSubmitReview(e) {
             navigateTo("payment-view");
         }
 
-        function executeFinalPaymentProcessing() {
+        async function executeFinalPaymentProcessing() {
     const loadingOverlay = document.createElement('div');
     loadingOverlay.id = "loading-overlay";
     loadingOverlay.className = "fixed inset-0 bg-black/90 z-[999] flex flex-col items-center justify-center";
     loadingOverlay.innerHTML = `
         <div class="w-20 h-20 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
-        <p class="mt-6 text-white text-sm">결제 서버 연결 중...</p>`;
+        <p class="mt-6 text-white text-sm">ê²°ì œ ì„œë²„ ì—°ê²° ì¤‘...</p>`;
     document.body.appendChild(loadingOverlay);
 
-    setTimeout(() => {
-        document.getElementById('loading-overlay').remove();
-        selectedSchedule.reservedSeats.push(selectedSeat);
+    try {
+        if (!currentUser) {
+            alert("Please login before booking a ticket.");
+            navigateTo("auth-view");
+            return;
+        }
 
-        // 선택한 관람 날짜 포맷팅 (예: 2024년 6월 15일)
-        let formattedWatchDate = "지정 안됨";
+        let formattedWatchDate = "Not selected";
+        let watchDateForDb = null;
         if (selectedReservationData.date) {
             const d = selectedReservationData.date;
-            formattedWatchDate = `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
+            formattedWatchDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+            watchDateForDb = d.toISOString().slice(0, 10);
         }
 
         const ticketPrice = selectedSchedule.price ? selectedSchedule.price : 14000;
@@ -1131,17 +1325,52 @@ function executeSubmitReview(e) {
             movieTitle: selectedMovie.title,
             theaterName: selectedSchedule.theaterName,
             hall: selectedSchedule.hall,
-            watchDate: formattedWatchDate, // <-- 새로 추가된 관람 일자
+            watchDate: formattedWatchDate,
             time: selectedSchedule.time,
             seatId: selectedSeat,
             price: ticketPrice,
-            payDate: new Date().toLocaleString('ko-KR') // 기존 결제 일시 이름 변경
+            payDate: new Date().toLocaleString('ko-KR'),
+            scheduleId: selectedSchedule.id
         };
+
+        if (supabaseClient) {
+            const nextReservedSeats = Array.from(new Set([...(selectedSchedule.reservedSeats || []), selectedSeat]));
+            const { error: reservationError } = await supabaseClient.from("reservations").insert({
+                ticket_id: newTicket.ticketId,
+                user_id: currentUser.id,
+                movie_id: selectedMovie.id,
+                movie_title: selectedMovie.title,
+                schedule_id: selectedSchedule.id,
+                theater_name: selectedSchedule.theaterName,
+                hall: selectedSchedule.hall,
+                watch_date: watchDateForDb,
+                show_time: selectedSchedule.time,
+                seat_id: selectedSeat,
+                price: ticketPrice
+            });
+
+            if (reservationError) throw reservationError;
+
+            const { error: scheduleError } = await supabaseClient
+                .from("schedules")
+                .update({ reserved_seats: nextReservedSeats })
+                .eq("id", selectedSchedule.id);
+
+            if (scheduleError) throw scheduleError;
+            selectedSchedule.reservedSeats = nextReservedSeats;
+        } else {
+            selectedSchedule.reservedSeats.push(selectedSeat);
+        }
 
         userTickets.unshift(newTicket);
         renderUserTicketsContainer();
         navigateTo("receipt-view");
-    }, 2500);
+    } catch (error) {
+        alert("Booking failed: " + error.message);
+    } finally {
+        const overlay = document.getElementById('loading-overlay');
+        if (overlay) overlay.remove();
+    }
 }
 
         function renderUserTicketsContainer() {
@@ -1167,22 +1396,38 @@ function executeSubmitReview(e) {
             });
         }
 
-        function executeCancelTicket(ticketId) {
-            if (!confirm("선택하신 모바일 티켓 영수증 발권을 전면 취소하시겠습니까?")) return;
+        async function executeCancelTicket(ticketId) {
+            if (!confirm("ì„ íƒí•˜ì‹  ëª¨ë°”ì¼ í‹°ì¼“ ì˜ìˆ˜ì¦ ë°œê¶Œì„ ì „ë©´ ì·¨ì†Œí•˜ì‹œê² ìŠµë‹ˆê¹Œ?")) return;
 
             const tIdx = userTickets.findIndex(t => t.ticketId === ticketId);
             if (tIdx === -1) return;
 
             const targetTicket = userTickets[tIdx];
-            const sch = schedules.find(s => s.time === targetTicket.time && s.theaterName === targetTicket.theaterName);
+            const sch = schedules.find(s => s.id === targetTicket.scheduleId || (s.time === targetTicket.time && s.theaterName === targetTicket.theaterName));
+
+            if (supabaseClient) {
+                const { error } = await supabaseClient
+                    .from("reservations")
+                    .delete()
+                    .eq("ticket_id", ticketId)
+                    .eq("user_id", currentUser.id);
+
+                if (error) {
+                    alert("Cancel failed: " + error.message);
+                    return;
+                }
+            }
             
             if (sch) {
                 sch.reservedSeats = sch.reservedSeats.filter(seat => seat !== targetTicket.seatId);
+                if (supabaseClient) {
+                    await supabaseClient.from("schedules").update({ reserved_seats: sch.reservedSeats }).eq("id", sch.id);
+                }
             }
 
             userTickets.splice(tIdx, 1);
             renderUserTicketsContainer();
-            showToast("예매가 취소되었습니다.");
+            showToast("ì˜ˆë§¤ê°€ ì·¨ì†Œë˜ì—ˆìŠµë‹ˆë‹¤.");
         }
 
         function openTicketInfoModal(ticketId) {
