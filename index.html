@@ -526,7 +526,8 @@
                 hall: row.hall,
                 time: row.show_time,
                 price: row.price,
-                reservedSeats: row.reserved_seats || []
+                reservedSeats: row.reserved_seats || [],
+                reservedSeatsByDate: row.reserved_seats_by_date || {}
             };
         }
 
@@ -566,7 +567,11 @@
         }
 
         async function loadUserTicketsFromSupabase() {
-            if (!supabaseClient || !currentUser?.id) return;
+            if (!supabaseClient || !currentUser?.id) {
+                userTickets = loadTicketsFromLocalStorage();
+                rebuildReservedSeatsByDateFromTickets(userTickets);
+                return;
+            }
             const { data, error } = await supabaseClient
                 .from("reservations")
                 .select("id,ticket_id,movie_title,theater_name,hall,watch_date,show_time,seat_id,price,created_at,schedule_id")
@@ -575,10 +580,12 @@
 
             if (error) {
                 console.error(error);
+                userTickets = loadTicketsFromLocalStorage();
+                rebuildReservedSeatsByDateFromTickets(userTickets);
                 return;
             }
 
-            userTickets = (data || []).map(t => ({
+            const supabaseTickets = (data || []).map(t => ({
                 id: t.id,
                 ticketId: t.ticket_id,
                 movieTitle: t.movie_title,
@@ -591,6 +598,10 @@
                 payDate: new Date(t.created_at).toLocaleString("ko-KR"),
                 scheduleId: t.schedule_id
             }));
+
+            userTickets = mergeTicketLists(supabaseTickets, loadTicketsFromLocalStorage());
+            saveTicketsToLocalStorage();
+            rebuildReservedSeatsByDateFromTickets(userTickets);
         }
 
         async function loadSchedulesFromSupabase() {
@@ -601,6 +612,50 @@
                 return;
             }
             if (data?.length) schedules = data.map(mapSupabaseSchedule);
+            await loadReservedSeatsByDateFromSupabase();
+            rebuildReservedSeatsByDateFromTickets(userTickets);
+        }
+
+        async function loadReservedSeatsByDateFromSupabase() {
+            if (!supabaseClient) return;
+            const { data, error } = await supabaseClient
+                .from("reservations")
+                .select("schedule_id,watch_date,seat_id");
+
+            if (error) {
+                console.error(error);
+                return;
+            }
+
+            (data || []).forEach(reservation => {
+                if (!reservation.schedule_id || !reservation.watch_date || !reservation.seat_id) return;
+                const schedule = schedules.find(s => s.id === reservation.schedule_id);
+                if (!schedule) return;
+                const seatsForDate = new Set(schedule.reservedSeatsByDate?.[reservation.watch_date] || []);
+                seatsForDate.add(reservation.seat_id);
+                setReservedSeatsForScheduleDate(schedule, reservation.watch_date, Array.from(seatsForDate));
+            });
+        }
+
+        async function loadReservedSeatsByDateFromSupabase() {
+            if (!supabaseClient) return;
+            const { data, error } = await supabaseClient
+                .from("reservations")
+                .select("schedule_id,watch_date,seat_id");
+
+            if (error) {
+                console.error(error);
+                return;
+            }
+
+            (data || []).forEach(reservation => {
+                if (!reservation.schedule_id || !reservation.watch_date || !reservation.seat_id) return;
+                const schedule = schedules.find(s => s.id === reservation.schedule_id);
+                if (!schedule) return;
+                const seatsForDate = new Set(schedule.reservedSeatsByDate?.[reservation.watch_date] || []);
+                seatsForDate.add(reservation.seat_id);
+                setReservedSeatsForScheduleDate(schedule, reservation.watch_date, Array.from(seatsForDate));
+            });
         }
 
         async function loadReviewsForSelectedMovie() {
@@ -740,12 +795,7 @@ let cinemaMap = null;
             { id: "S-202", movieId: "M-02", theaterName: "CGV 센텀시티", hall: "IMAX 관", time: "20:15", price: 16000, reservedSeats: [] }
         ];
 
-        let currentUser = {
-            email: "ee251285@gmail.com",
-            name: "에르덴",
-            phone: "010-1234-5678",
-            isAdmin: true
-        };
+        let currentUser = null;
         let userTickets = [];
         
         let selectedMovie = null;
@@ -760,6 +810,83 @@ let cinemaMap = null;
             date: null,
             time: null
         };
+
+        const LOCAL_TICKETS_KEY_PREFIX = "movieTicket.userTickets.";
+
+        function formatWatchDate(dateObj) {
+            if (!dateObj) return "Not selected";
+            return `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, "0")}-${String(dateObj.getDate()).padStart(2, "0")}`;
+        }
+
+        function getSelectedWatchDateKey() {
+            return formatWatchDate(selectedReservationData.date);
+        }
+
+        function getTicketStorageKey() {
+            if (!currentUser) return null;
+            return `${LOCAL_TICKETS_KEY_PREFIX}${currentUser.id || currentUser.email}`;
+        }
+
+        function loadTicketsFromLocalStorage() {
+            const key = getTicketStorageKey();
+            if (!key) return [];
+
+            try {
+                return JSON.parse(localStorage.getItem(key) || "[]");
+            } catch (error) {
+                console.error("Could not load saved tickets.", error);
+                return [];
+            }
+        }
+
+        function saveTicketsToLocalStorage() {
+            const key = getTicketStorageKey();
+            if (!key) return;
+            localStorage.setItem(key, JSON.stringify(userTickets));
+        }
+
+        function mergeTicketLists(primaryTickets, fallbackTickets) {
+            const ticketMap = new Map();
+            [...fallbackTickets, ...primaryTickets].forEach(ticket => {
+                if (ticket?.ticketId) ticketMap.set(ticket.ticketId, ticket);
+            });
+            return Array.from(ticketMap.values());
+        }
+
+        function getReservedSeatsForScheduleDate(schedule, watchDate = getSelectedWatchDateKey()) {
+            if (!schedule) return [];
+            if (watchDate && watchDate !== "Not selected") {
+                return schedule.reservedSeatsByDate?.[watchDate] || [];
+            }
+            return schedule.reservedSeats || [];
+        }
+
+        function setReservedSeatsForScheduleDate(schedule, watchDate, reservedSeats) {
+            if (!schedule) return;
+            if (watchDate && watchDate !== "Not selected") {
+                schedule.reservedSeatsByDate = {
+                    ...(schedule.reservedSeatsByDate || {}),
+                    [watchDate]: reservedSeats
+                };
+            } else {
+                schedule.reservedSeats = reservedSeats;
+            }
+        }
+
+        function rebuildReservedSeatsByDateFromTickets(tickets) {
+            schedules.forEach(schedule => {
+                schedule.reservedSeatsByDate = {};
+            });
+
+            tickets.forEach(ticket => {
+                if (!ticket.scheduleId || !ticket.watchDate || ticket.watchDate === "Not selected") return;
+                const schedule = schedules.find(s => s.id === ticket.scheduleId);
+                if (!schedule) return;
+                const seatsForDate = new Set(schedule.reservedSeatsByDate?.[ticket.watchDate] || []);
+                seatsForDate.add(ticket.seatId);
+                setReservedSeatsForScheduleDate(schedule, ticket.watchDate, Array.from(seatsForDate));
+            });
+        }
 
         window.addEventListener("load", () => {
             setTimeout(() => {
@@ -795,6 +922,7 @@ let cinemaMap = null;
                 document.getElementById("prof-email").value = currentUser.email;
                 document.getElementById("prof-name").value = currentUser.name;
                 document.getElementById("prof-phone").value = currentUser.phone || "";
+                renderUserTicketsContainer();
             } else {
                 statusText.innerText = "비인증 세션 계정";
                 authBtn.innerText = "로그인";
@@ -899,7 +1027,7 @@ function renderTimeSchedules() {
         schTimeline.innerHTML = `<p class="text-xs text-gray-500 py-2">지정하신 날짜/극장에 편성된 상영 스케줄이 없습니다.</p>`;
     } else {
         matchedSchedules.forEach(sch => {
-            const remainingSeats = 32 - sch.reservedSeats.length;
+            const remainingSeats = 32 - getReservedSeatsForScheduleDate(sch).length;
             schTimeline.innerHTML += `
                 <button onclick="selectActiveTimeScheduler('${sch.id}')" class="border border-gray-700 bg-neutral-800 hover:border-amber-500 rounded-xl p-3 text-center transition flex flex-col items-center min-w-[100px]">
                     <span class="text-sm font-black text-amber-400">${sch.time}</span>
@@ -954,6 +1082,8 @@ function renderTimeSchedules() {
                     phone: "010-1234-5678",
                     isAdmin: true
                 };
+                userTickets = loadTicketsFromLocalStorage();
+                rebuildReservedSeatsByDateFromTickets(userTickets);
                 initAppSession();
                 showToast(`Welcome, ${currentUser.name}!`);
                 navigateTo("main-view");
@@ -1244,7 +1374,7 @@ async function executeSubmitReview(e) {
             rows.forEach(row => {
                 for (let i = 1; i <= 8; i++) {
                     const seatId = `${row}${i}`;
-                    const isReserved = selectedSchedule.reservedSeats.includes(seatId);
+                    const isReserved = getReservedSeatsForScheduleDate(selectedSchedule).includes(seatId);
                     const isSelected = (selectedSeat === seatId);
 
                     let btnClass = "w-9 h-9 rounded text-[10px] font-black transition ";
@@ -1311,13 +1441,8 @@ async function executeSubmitReview(e) {
             return;
         }
 
-        let formattedWatchDate = "Not selected";
-        let watchDateForDb = null;
-        if (selectedReservationData.date) {
-            const d = selectedReservationData.date;
-            formattedWatchDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-            watchDateForDb = d.toISOString().slice(0, 10);
-        }
+        const formattedWatchDate = formatWatchDate(selectedReservationData.date);
+        const watchDateForDb = selectedReservationData.date ? formattedWatchDate : null;
 
         const ticketPrice = selectedSchedule.price ? selectedSchedule.price : 14000;
         const newTicket = {
@@ -1333,8 +1458,15 @@ async function executeSubmitReview(e) {
             scheduleId: selectedSchedule.id
         };
 
+        const alreadyReservedSeats = getReservedSeatsForScheduleDate(selectedSchedule, formattedWatchDate);
+        if (alreadyReservedSeats.includes(selectedSeat)) {
+            alert("This seat is already reserved for the selected date. Please choose another seat.");
+            navigateTo("reservation-view");
+            renderSeatMatrixMap();
+            return;
+        }
+
         if (supabaseClient) {
-            const nextReservedSeats = Array.from(new Set([...(selectedSchedule.reservedSeats || []), selectedSeat]));
             const { error: reservationError } = await supabaseClient.from("reservations").insert({
                 ticket_id: newTicket.ticketId,
                 user_id: currentUser.id,
@@ -1351,18 +1483,13 @@ async function executeSubmitReview(e) {
 
             if (reservationError) throw reservationError;
 
-            const { error: scheduleError } = await supabaseClient
-                .from("schedules")
-                .update({ reserved_seats: nextReservedSeats })
-                .eq("id", selectedSchedule.id);
-
-            if (scheduleError) throw scheduleError;
-            selectedSchedule.reservedSeats = nextReservedSeats;
-        } else {
-            selectedSchedule.reservedSeats.push(selectedSeat);
         }
 
+        const nextReservedSeats = Array.from(new Set([...alreadyReservedSeats, selectedSeat]));
+        setReservedSeatsForScheduleDate(selectedSchedule, formattedWatchDate, nextReservedSeats);
+
         userTickets.unshift(newTicket);
+        saveTicketsToLocalStorage();
         renderUserTicketsContainer();
         navigateTo("receipt-view");
     } catch (error) {
@@ -1397,7 +1524,7 @@ async function executeSubmitReview(e) {
         }
 
         async function executeCancelTicket(ticketId) {
-            if (!confirm("ì„ íƒí•˜ì‹  ëª¨ë°”ì¼ í‹°ì¼“ ì˜ìˆ˜ì¦ ë°œê¶Œì„ ì „ë©´ ì·¨ì†Œí•˜ì‹œê² ìŠµë‹ˆê¹Œ?")) return;
+            if (!confirm("선택하신 모바일 티켓 예매를 취소하시겠습니까?")) return;
 
             const tIdx = userTickets.findIndex(t => t.ticketId === ticketId);
             if (tIdx === -1) return;
@@ -1419,15 +1546,18 @@ async function executeSubmitReview(e) {
             }
             
             if (sch) {
-                sch.reservedSeats = sch.reservedSeats.filter(seat => seat !== targetTicket.seatId);
-                if (supabaseClient) {
-                    await supabaseClient.from("schedules").update({ reserved_seats: sch.reservedSeats }).eq("id", sch.id);
-                }
+                const seatsForDate = getReservedSeatsForScheduleDate(sch, targetTicket.watchDate);
+                setReservedSeatsForScheduleDate(
+                    sch,
+                    targetTicket.watchDate,
+                    seatsForDate.filter(seat => seat !== targetTicket.seatId)
+                );
             }
 
             userTickets.splice(tIdx, 1);
+            saveTicketsToLocalStorage();
             renderUserTicketsContainer();
-            showToast("ì˜ˆë§¤ê°€ ì·¨ì†Œë˜ì—ˆìŠµë‹ˆë‹¤.");
+            showToast("예매가 취소되었습니다.");
         }
 
         function openTicketInfoModal(ticketId) {
@@ -1468,7 +1598,7 @@ async function executeSubmitReview(e) {
             schedules.forEach(s => {
                 const movie = movies.find(m => m.id === s.movieId);
                 const title = movie ? movie.title : "알 수 없음";
-                const ticketsCount = s.reservedSeats.length;
+                const ticketsCount = Object.values(s.reservedSeatsByDate || {}).reduce((sum, seats) => sum + seats.length, 0) || s.reservedSeats.length;
                 const costPrice = s.price ? s.price : 14000;
                 const sales = ticketsCount * costPrice;
                 const occupancy = ((ticketsCount / 32) * 100).toFixed(1);
@@ -1603,7 +1733,8 @@ async function executeSubmitReview(e) {
                 hall: hall,
                 time: time,
                 price: price,
-                reservedSeats: []
+                reservedSeats: [],
+                reservedSeatsByDate: {}
             };
 
             schedules.push(newSchedule);
